@@ -1,0 +1,7 @@
+{
+    "require": {
+        "php": "^7.4",
+        "morilog/jalali": "^3.4",
+        "econea/nusoap": "^0.9.13"
+    }
+}

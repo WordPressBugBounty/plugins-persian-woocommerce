@@ -1,0 +1,26 @@
+@font-face {
+    font-family: 'Vazirmatn';
+    src: url('../fonts/Vazirmatn[wght].woff2') format('woff2 supports variations'),
+    url('../fonts/Vazirmatn[wght].woff2') format('woff2-variations');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+#wpbody, h1, h2, h3, h4, h5, h6 {
+    font-family: Vazirmatn, serif !important;
+}
+
+label[for^="quarter_"],
+label[for^="last_quarter_"] {
+    display: none;
+}
+
+.woocommerce-segmented-selection__item:has(label[for^="quarter_"]),
+.woocommerce-segmented-selection__item:has(label[for^="last_quarter_"]) {
+    border-top: none;
+}
+
+[id^="tab-panel-"][id$="-custom"] {
+    display: none;
+}

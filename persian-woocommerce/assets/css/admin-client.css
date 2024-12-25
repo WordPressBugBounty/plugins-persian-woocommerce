@@ -24,3 +24,7 @@ label[for^="last_quarter_"] {
 [id^="tab-panel-"][id$="-custom"] {
     display: none;
 }
+
+.components-button.woocommerce-dropdown-button.is-open:after {
+    transform: translateX(12px) translateY(2px) rotate(-180deg) !important;
+}

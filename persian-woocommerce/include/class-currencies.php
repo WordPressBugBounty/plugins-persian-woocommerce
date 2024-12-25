@@ -10,15 +10,13 @@ class Persian_Woocommerce_Currencies extends Persian_Woocommerce_Core {
 	public static $currency = null;
 
 	public function __construct() {
-
-		self::$currency = get_woocommerce_currency();
-
 		$this->currencies = [
-			'IRR'  => __( 'ریال', 'woocommerce' ),
-			'IRHR' => __( 'هزار ریال', 'woocommerce' ),
-			'IRT'  => __( 'تومان', 'woocommerce' ),
-			'IRHT' => __( 'هزار تومان', 'woocommerce' ),
+			'IRR'  => 'ریال',
+			'IRHR' => 'هزار ریال',
+			'IRT'  => 'تومان',
+			'IRHT' => 'هزار تومان',
 		];
+
 
 		add_filter( 'woocommerce_currencies', [ $this, 'currencies' ] );
 		add_filter( 'woocommerce_currency_symbol', [ $this, 'currency_symbol' ], 10, 2 );
@@ -32,6 +30,7 @@ class Persian_Woocommerce_Currencies extends Persian_Woocommerce_Core {
 	}
 
 	public function currencies( array $currencies ): array {
+
 		return $this->currencies + $currencies;
 	}
 

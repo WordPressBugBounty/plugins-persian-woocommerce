@@ -4,6 +4,26 @@ defined( 'ABSPATH' ) || exit;
 
 class Persian_Woocommerce_Tools extends Persian_Woocommerce_Core {
 
+	/**
+	 * @var PW_Tools_Price
+	 */
+	public PW_Tools_Price $price;
+
+	/**
+	 * @var PW_Tools_DatePicker
+	 */
+	public PW_Tools_DatePicker $datepicker;
+
+	/**
+	 * @var PW_Tools_Checkout
+	 */
+	public PW_Tools_Checkout $checkout;
+
+	/**
+	 * @var PW_WC_Admin
+	 */
+	public PW_WC_Admin $wc_admin;
+
 	public function __construct() {
 		add_action( 'admin_init', [ $this, 'tools_save' ] );
 		add_filter( 'woocommerce_admin_field_multi_select_states', [ $this, 'specific_states_field' ] );

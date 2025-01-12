@@ -159,7 +159,7 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 
 		$description = 'خریدار: ' . $order->get_formatted_billing_full_name();
 
-		$mobile = $order->get_meta( '_billing_phone' );
+		$mobile = $order->get_billing_phone();
 
 		if ( ! empty( $mobile ) ) {
 
@@ -301,7 +301,8 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 
 
 		if ( $order->is_paid() ) {
-			$track_id = $order->get_meta( '_transaction_id' );
+
+			$track_id = $order->get_transaction_id();
 			$notice   = wpautop( wptexturize( $this->success_massage ) );
 			$notice   = str_replace( "{transaction_id}", $track_id, $notice );
 

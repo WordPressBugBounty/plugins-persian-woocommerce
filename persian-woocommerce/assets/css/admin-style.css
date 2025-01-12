@@ -1,19 +1,5 @@
-@font-face {
-    font-family: 'Vazirmatn';
-    src: url('../fonts/Vazirmatn[wght].woff2') format('woff2 supports variations'),
-    url('../fonts/Vazirmatn[wght].woff2') format('woff2-variations');
-    font-weight: 100 900;
-    font-style: normal;
-    font-display: swap;
-}
-
-#wpbody, h1, h2, h3, h4, h5, h6 {
-    font-family: Vazirmatn, serif !important;
-}
-
 .persian-woocommerce {
     background: #fff;
-    font-family: Vazirmatn;
     padding: 15px;
     margin: 15px;
     border-radius: 8px;
@@ -21,10 +7,6 @@
     -webkit-box-shadow: 0 0 30px #ddd;
     -moz-box-shadow: 0 0 30px #ddd;
     border: 1px solid #e4e4e4;
-}
-
-.persian-woocommerce h1, .persian-woocommerce h2, .persian-woocommerce h3, .persian-woocommerce h4, .persian-woocommerce h5, .persian-woocommerce h6 {
-    font-family: Vazirmatn !important;
 }
 
 
@@ -78,13 +60,9 @@
         display: inline;
         float: right;
         padding: 5px;
-        font-family: Vazirmatn;
-
-
     }
 
     .right-side-pwoo h3 {
-        font-family: Vazirmatn;
         margin: none;
         margin-top: 12px;
     }
@@ -116,10 +94,6 @@
 
 .feature-section, .changelog {
     clear: both;
-}
-
-.persian-woocommerce .about-wrap h1, .persian-woocommerce .about-wrap h2, .persian-woocommerce .about-wrap h3, .persian-woocommerce .about-wrap h4, .persian-woocommerce .about-wrap h5 {
-    font-family: Vazirmatn !important;
 }
 
 .about-wrap img {
@@ -164,4 +138,22 @@
     width: 46%;
     padding: 2%;
     float: right;
+}
+
+.pw_file_uploader_image {
+    max-width: 100px;
+    max-height: 100px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.pw_file_uploader_buttons {
+    display: flex;
+    align-items: center;
+}
+
+.pw_file_uploader_remove_button {
+    text-decoration: none;
+    color: red;
+    margin-inline-start: 10px;
 }

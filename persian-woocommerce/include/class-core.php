@@ -121,11 +121,11 @@ class Persian_Woocommerce_Core {
 
 	public function admin_head() {
 		?>
-		<script type="text/javascript">
+        <script type="text/javascript">
             jQuery(document).ready(function ($) {
                 $("ul#adminmenu a[href$='https://yun.ir/pwtm']").attr('target', '_blank');
             });
-		</script>
+        </script>
 		<?php
 	}
 
@@ -222,6 +222,8 @@ class Persian_Woocommerce_Core {
 		if ( in_array( $page, $pages ) ) {
 			wp_enqueue_style( 'pw-admin-style', $this->plugin_url( 'assets/css/admin-style.css' ) );
 		}
+
+		wp_register_script( 'pw-admin-script', $this->plugin_url( 'assets/js/admin-script.js' ), false, PW_VERSION, true );
 	}
 
 	public function plugin_url( $path = null ): string {

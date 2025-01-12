@@ -20,13 +20,70 @@ class Persian_Woocommerce_Tools extends Persian_Woocommerce_Core {
 	public PW_Tools_Checkout $checkout;
 
 	/**
+	 * @var PW_Tools_Design
+	 */
+	public PW_Tools_Design $design;
+
+	/**
 	 * @var PW_WC_Admin
 	 */
 	public PW_WC_Admin $wc_admin;
 
+
 	public function __construct() {
 		add_action( 'admin_init', [ $this, 'tools_save' ] );
+		add_action( 'woocommerce_admin_field_file', [ $this, 'callback_file' ], 1, 10 );
+
 		add_filter( 'woocommerce_admin_field_multi_select_states', [ $this, 'specific_states_field' ] );
+	}
+
+	/**
+	 * Add custom image file input to woocommerce fields
+	 *
+	 * @param array $value
+	 *
+	 * @returon void
+	 */
+	public function callback_file( array $value ): void {
+		$defaults = [
+			'button' => 'انتخاب تصویر',
+		];
+		$value    = wp_parse_args( $value, $defaults );
+		$id       = md5( $value['id'] );
+		$display  = ! empty( $value['value'] ) ? 'inline-block' : 'none';
+		?>
+        <tr class="<?php echo esc_attr( $value['row_class'] ); ?> pw_file_input_row" data-uploader-id="<?php echo $id; ?>">
+            <th scope="row" class="titledesc">
+                <label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
+            </th>
+
+            <td class="forminp forminp-<?php echo esc_attr( sanitize_title( $value['type'] ) ); ?>">
+                <img id="<?php echo $id; ?>_image"
+                     src="<?php echo $value['value']; ?>"
+                     class="pw_file_uploader_image">
+
+                <input type="text" name="<?php echo $value['id']; ?>"
+                       id="<?php echo $value['id']; ?>"
+                       class="<?php echo $id; ?>_input"
+                       value="<?php echo esc_attr( $value['value'] ); ?>"
+                       style="display:none;">
+
+                <div class="pw_file_uploader_buttons">
+                    <a href="#" id="<?php echo $id; ?>_upload_button" class="button">
+						<?php echo esc_attr( $value['button'] ); ?>
+                    </a>
+
+                    <a href="#" id="<?php echo $id; ?>_remove_button"
+                       class="pw_file_uploader_remove_button"
+                       style="--animation-delaydisplay: <?php echo $display; ?> ">
+                        حذف تصویر
+                    </a>
+                </div>
+				<?php echo esc_html( $value['suffix'] ?? null ); ?><?php echo $value['desc']; // WPCS: XSS ok. ?>
+            </td>
+        </tr>
+		<?php
+
 	}
 
 	public function tools_tabs( $current_tab = 'date', $current_section = '' ): array {
@@ -43,6 +100,7 @@ class Persian_Woocommerce_Tools extends Persian_Woocommerce_Core {
 			'date'     => 'تاریخ شمسی',
 			'price'    => 'گزینه های قیمت',
 			'checkout' => 'تسویه حساب',
+			'design'   => 'ظاهر'
 		] );
 
 		$sections['fields'] = apply_filters( 'PW_Tools_sections', [] );
@@ -61,10 +119,7 @@ class Persian_Woocommerce_Tools extends Persian_Woocommerce_Core {
 				$class         = 'nav-tab-active';
 			}
 
-			printf( "<a class='nav-tab %s' href='?page=persian-wc-tools&tab=%s'>%s</a>",
-				esc_attr( $class ),
-				esc_attr( $tab ),
-				esc_attr( $tab_name ) );
+			printf( "<a class='nav-tab %s' href='?page=persian-wc-tools&tab=%s'>%s</a>", esc_attr( $class ), esc_attr( $tab ), esc_attr( $tab_name ) );
 
 			if ( $tab == $current_tab && isset( $sections[ $tab ] ) ) {
 				foreach ( $sections[ $tab ] as $section => $section_name ) {
@@ -119,6 +174,54 @@ class Persian_Woocommerce_Tools extends Persian_Woocommerce_Core {
 					'type' => 'sectionend',
 					'id'   => 'general_options',
 				],
+			],
+
+			'design' => [
+				[
+					'title' => 'فونت مدیریت',
+					'type'  => 'title',
+					'id'    => 'admin_font_options',
+				],
+				[
+					'title'   => 'خانواده فونت',
+					'id'      => 'PW_Options[admin_font_family]',
+					'default' => 'iransans',
+					'type'    => 'select',
+					'options' => [
+						'none'            => 'غیرفعال',
+						'vazirmatn'       => 'فونت وزیرمتن',
+						'vazirmatn-fanum' => 'فونت وزیرمتن (اعداد فارسی)',
+						'iransans'        => 'فونت ایران سنس',
+						'iransans-fanum'  => 'فونت ایران سنس (اعداد فارسی)',
+						'yekanbakh'       => 'فونت یکان بخ',
+						'yekanbakh-fanum' => 'فونت یکان بخ (اعداد فارسی)'
+					],
+					'css'     => 'width:50%;min-width:300px;',
+				],
+				[
+					'type' => 'sectionend',
+					'id'   => 'admin_font_options',
+				],
+
+				[
+					'title' => 'سفارشی سازی صفحه ورود',
+					'type'  => 'title',
+					'id'    => 'admin_login_options',
+				],
+
+				[
+					'title'       => 'لوگو',
+					'id'          => 'PW_Options[admin_login_logo_url]',
+					'default'     => '',
+					'type'        => 'file',
+					'placeholder' => 'این فایل جایگزین لوگو وردپرس خواهد شد.',
+				],
+
+				[
+					'type' => 'sectionend',
+					'id'   => 'admin_login_options',
+				],
+
 			],
 
 			'price' => [
@@ -363,10 +466,11 @@ class Persian_Woocommerce_Tools extends Persian_Woocommerce_Core {
 		wp_enqueue_style( 'woocommerce_admin_styles' );
 		wp_enqueue_script( 'wc-enhanced-select' );
 		wp_enqueue_script( 'pw-admin-script' );
+		wp_enqueue_media();
 		?>
 
-		<div class="wrap persian-woocommerce">
-			<h2>ابزارهای ووکامرس فارسی</h2>
+        <div class="wrap persian-woocommerce">
+            <h2>ابزارهای ووکامرس فارسی</h2>
 
 			<?php
 			$updated = intval( $_GET['updated'] ?? 0 );
@@ -381,8 +485,8 @@ class Persian_Woocommerce_Tools extends Persian_Woocommerce_Core {
 			[ $tab, $section ] = $this->tools_tabs( $current_tab, $current_section );
 			?>
 
-			<div id="poststuff">
-				<form method="post" action="<?php admin_url( 'themes.php?page=persian-wc-tools' ); ?>">
+            <div id="poststuff">
+                <form method="post" action="<?php admin_url( 'themes.php?page=persian-wc-tools' ); ?>">
 					<?php
 					wp_nonce_field( "persian-wc-tools" );
 
@@ -391,17 +495,17 @@ class Persian_Woocommerce_Tools extends Persian_Woocommerce_Core {
 					}
 
 					?>
-					<p class="submit" style="clear: both;">
-						<input type="submit" name="Submit" class="button-primary" value="ذخیره تنظیمات"/>
-						<input type="hidden" name="pw-settings-submit" value="Y"/>
-						<input type="hidden" name="pw-tab" value="<?php echo esc_attr( $tab ); ?>"/>
-						<input type="hidden" name="pw-section" value="<?php echo esc_attr( $section ); ?>"/>
-					</p>
-				</form>
-			</div>
+                    <p class="submit" style="clear: both;">
+                        <input type="submit" name="Submit" class="button-primary" value="ذخیره تنظیمات"/>
+                        <input type="hidden" name="pw-settings-submit" value="Y"/>
+                        <input type="hidden" name="pw-tab" value="<?php echo esc_attr( $tab ); ?>"/>
+                        <input type="hidden" name="pw-section" value="<?php echo esc_attr( $section ); ?>"/>
+                    </p>
+                </form>
+            </div>
 
-		</div>
-		<script type="text/javascript">
+        </div>
+        <script type="text/javascript">
             jQuery(document).ready(function ($) {
                 $('.persian-woocommerce').on('click', '.select_all', function () {
                     jQuery(this).closest('td').find('select option').attr('selected', 'selected');
@@ -421,7 +525,7 @@ class Persian_Woocommerce_Tools extends Persian_Woocommerce_Core {
                     }
                 }).change();
             });
-		</script>
+        </script>
 		<?php
 	}
 
@@ -458,14 +562,14 @@ class Persian_Woocommerce_Tools extends Persian_Woocommerce_Core {
 
 		$selections = (array) PW()->get_options( 'specific_allowed_states' );
 		?>
-		<tr valign="top">
-		<th scope="row" class="titledesc">
-			<label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
-		</th>
-		<td class="forminp">
-			<select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px"
-					data-placeholder="استان (ها) مورد نظر خود را انتخاب کنید ..." title="استان"
-					class="wc-enhanced-select">
+        <tr valign="top">
+        <th scope="row" class="titledesc">
+            <label for="<?php echo esc_attr( $value['id'] ); ?>"><?php echo esc_html( $value['title'] ); ?></label>
+        </th>
+        <td class="forminp">
+            <select multiple="multiple" name="<?php echo esc_attr( $value['id'] ); ?>[]" style="width:350px"
+                    data-placeholder="استان (ها) مورد نظر خود را انتخاب کنید ..." title="استان"
+                    class="wc-enhanced-select">
 				<?php
 				if ( ! empty( PW()->address->states ) ) {
 					foreach ( PW()->address->states as $key => $val ) {
@@ -473,10 +577,10 @@ class Persian_Woocommerce_Tools extends Persian_Woocommerce_Core {
 					}
 				}
 				?>
-			</select> <br/><a class="select_all button" href="#">انتخاب همه</a> <a
-					class="select_none button" href="#">هیچکدام</a>
-		</td>
-		</tr><?php
+            </select> <br/><a class="select_all button" href="#">انتخاب همه</a> <a
+                    class="select_none button" href="#">هیچکدام</a>
+        </td>
+        </tr><?php
 	}
 }
 
@@ -490,3 +594,4 @@ require_once 'tools/class-date.php';
 require_once 'tools/class-checkout.php';
 require_once 'tools/class-super-admin.php';
 require_once 'tools/class-wc-admin.php';
+require_once 'tools/class-design.php';

@@ -7,7 +7,7 @@ Tags: ووکامرس,woocommerce,ووکامرس فارسی,persian woocommerce,s
 Requires at least: 6.0.0
 Tested up to: 6.7.1
 Requires PHP: 7.4
-Stable tag: 9.1.0
+Stable tag: 9.2.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -39,6 +39,8 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.html
 * اتصال ایمن و سریع به درگاه زیبال بدون افزونه
 * ابزارساده سازی صفحه تسویه حساب ، مناسب برای فروشگاه های دانلودی و فروش فایل
 * و تمام آن چیزی که برای یک فروشگاه ووکامرسی نیاز است.
+* تغییر فونت محیط مدیریت
+* امکان تغییر لوگوی صفحه ورود وردپرس
 
 == Installation ==
 1. Upload `persian-woocommerce` folder to the `/wp-content/plugins/` directory
@@ -77,6 +79,10 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.html
 میتوانید راهنما و مستندات را از طریق سایت [WooSupport.ir](https://www.woosupport.ir) بدست بیاورید
 
 == Changelog ==
+= 9.2.0 =
+* بروزرسانی ترجمه
+* افزوده شدن قابلیت تغییر فونت در پیشخوان وردپرس (فونت وزیر ، فونت ایران سنس ، فونت یکان بخ)
+* افزوده شدن قابلیت تغییر لوگوی صفحه ورود وردپرس
 = 9.1.0 =
 * بروزرسانی ترجمه و چند قابلیت جدید ، سازگاری با آخرین نسخه ووکامرس
 = 9.0.0 =

@@ -48,19 +48,46 @@ class PW_Tools_Design {
 	public string $admin_login_logo_url = '';
 
 	/**
+	 * Admin login template name
+	 *
+	 * @var string
+	 */
+	public string $admin_login_template = '';
+
+	/**
 	 * Execute appearance features
 	 */
 	public function __construct() {
 		$this->init_admin_font();
-		$this->init_admin_login();
+		$this->init_admin_login_logo();
+		$this->init_admin_login_template();
 	}
+
+
+	/**
+	 * Apply out of box selected admin login template
+	 *
+	 * @return void
+	 */
+	public function init_admin_login_template() {
+		$this->admin_login_template = PW()->get_options( 'admin_login_template', '' );
+
+		if ( empty( $this->admin_login_template ) ) {
+			return;
+		}
+
+		$method = 'enqueue_login_template_' . $this->admin_login_template;
+
+		add_action( 'login_enqueue_scripts', [ $this, $method ] );
+	}
+
 
 	/**
 	 * Apply login page settings
 	 *
 	 * @return void
 	 */
-	public function init_admin_login() {
+	public function init_admin_login_logo() {
 		$this->admin_login_logo_url = sanitize_text_field( PW()->get_options( 'admin_login_logo_url', '' ) );
 
 		if ( empty( $this->admin_login_logo_url ) || ! filter_var( $this->admin_login_logo_url, FILTER_VALIDATE_URL ) ) {
@@ -76,14 +103,16 @@ class PW_Tools_Design {
 	 * @return void
 	 */
 	public function get_login_logo_css() {
-		echo "<style>
-		          #login h1 a, .login h1 a {
-                      background-image: url($this->admin_login_logo_url);
-                      height: 100px; 
-					  width: 100%; 
-					  background-size: contain;
-		          }
-	          </style>";
+		echo <<<EOF
+                <style>
+                    #login h1 a, .login h1 a {
+                        background-image: url($this->admin_login_logo_url);
+                        height: 100px; 
+                        width: 100%; 
+                        background-size: contain;
+                    }
+                </style>
+                EOF;
 	}
 
 	/**
@@ -139,6 +168,59 @@ class PW_Tools_Design {
 		return PW()->plugin_url( "assets/fonts/{$css_file_path}" );
 	}
 
+
+	/**
+	 * Read css file from url and return its content
+	 *
+	 * @param string $file_url
+	 *
+	 * @return string
+	 */
+	public function get_css_content_from_url( string $file_url = '' ): string {
+		$response    = wp_remote_get( $file_url );
+		$css_content = '';
+
+		if ( ! is_wp_error( $response ) ) {
+			$css_content = wp_remote_retrieve_body( $response );
+		}
+
+		return $css_content;
+	}
+
+
+	/**
+	 * Login template enqueue handler
+	 *
+	 * @param string $template_name The name of the login template (e.g., 'mahan', 'shamim').
+	 *
+	 * @return string
+	 */
+	public function enqueue_login_template( string $template_name ): void {
+		if ( empty( $template_name ) ) {
+			return;
+		}
+		$file_url = PW()->plugin_url( "assets/css/login-templates/{$template_name}.css" );
+		wp_enqueue_style( 'pw-admin-login-template-' . $template_name, $file_url, [], PW_VERSION );
+	}
+
+	/**
+	 * Enqueue Mahan login template
+	 *
+	 * @return void
+	 */
+	public function enqueue_login_template_mahan(): void {
+		$this->enqueue_login_template( 'mahan' );
+	}
+
+
+	/**
+	 * Enqueue Shamim login template
+	 *
+	 * @return void
+	 */
+	public function enqueue_login_template_shamim(): void {
+		$this->enqueue_login_template( 'shamim' );
+	}
 }
 
 PW()->tools->design = new PW_Tools_Design();

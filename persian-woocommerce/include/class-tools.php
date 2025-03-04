@@ -33,9 +33,53 @@ class Persian_Woocommerce_Tools extends Persian_Woocommerce_Core {
 	public function __construct() {
 		add_action( 'admin_init', [ $this, 'tools_save' ] );
 		add_action( 'woocommerce_admin_field_file', [ $this, 'callback_file' ], 1, 10 );
+		add_action( 'woocommerce_admin_field_select_image', [ $this, 'callback_select_image' ], 1, 11 );
 
 		add_filter( 'woocommerce_admin_field_multi_select_states', [ $this, 'specific_states_field' ] );
 	}
+
+
+	/**
+	 * Displays a dropdown which shows related image to the option
+	 *
+	 * @param array $args settings field args
+	 */
+	public function callback_select_image( array $args ): void {
+		$value = $args['value'];
+		?>
+        <tr class="<?php echo esc_attr( $args['row_class'] ); ?> pw_select_image_row">
+            <th scope="row" class="titledesc">
+                <label for="<?php echo esc_attr( $args['id'] ); ?>"><?php echo esc_html( $args['title'] ); ?></label>
+            </th>
+
+            <td class="forminp forminp-<?php echo esc_attr( sanitize_title( $args['type'] ) ); ?>">
+                <div class="pw_select_image_container">
+                    <select id="<?php echo esc_attr( $args['id'] ); ?>" name="<?php echo esc_attr( $args['id'] ); ?>" class="pw_select_image_select">
+						<?php foreach ( $args['options'] as $key => $value_data ) : ?>
+							<?php
+							// Check if the option is the default one (empty)
+							if ( is_array( $value_data ) ) {
+								$label = $value_data['label'];
+								$image = $value_data['image'];
+							} else {
+								$label = $value_data;
+								$image = '';
+							}
+							?>
+                            <option value="<?php echo esc_attr( $key ); ?>"
+                                    data-image-attr="<?php echo esc_url( $image ); ?>"
+								<?php selected( $value, $key ); ?>>
+								<?php echo esc_html( $label ); ?>
+                            </option>
+						<?php endforeach; ?>
+                    </select>
+                    <img src="" id="selected_image" class="pw_selected_image" style="display:none; width:300px; height:200px; transition: all 0.3s ease;"/>
+                </div>
+            </td>
+        </tr>
+		<?php
+	}
+
 
 	/**
 	 * Add custom image file input to woocommerce fields
@@ -83,7 +127,6 @@ class Persian_Woocommerce_Tools extends Persian_Woocommerce_Core {
             </td>
         </tr>
 		<?php
-
 	}
 
 	public function tools_tabs( $current_tab = 'date', $current_section = '' ): array {
@@ -202,13 +245,11 @@ class Persian_Woocommerce_Tools extends Persian_Woocommerce_Core {
 					'type' => 'sectionend',
 					'id'   => 'admin_font_options',
 				],
-
 				[
 					'title' => 'سفارشی سازی صفحه ورود',
 					'type'  => 'title',
 					'id'    => 'admin_login_options',
 				],
-
 				[
 					'title'       => 'لوگو',
 					'id'          => 'PW_Options[admin_login_logo_url]',
@@ -216,7 +257,25 @@ class Persian_Woocommerce_Tools extends Persian_Woocommerce_Core {
 					'type'        => 'file',
 					'placeholder' => 'این فایل جایگزین لوگو وردپرس خواهد شد.',
 				],
+				[
+					'title'   => 'قالب صفحه ورود',
+					'id'      => 'PW_Options[admin_login_template]',
+					'default' => '',
+					'type'    => 'select_image',
+					'options' => [
+						''       => 'هیچ کدام',
+						'mahan'  => [
+							'label' => 'ماهان',
+							'image' => PW()->plugin_url( 'assets/images/login/mahan.png' ),
+						],
+						'shamim' => [
+							'label' => 'شمیم',
+							'image' => PW()->plugin_url( 'assets/images/login/shamim.png' ),
+						],
+					],
 
+					'placeholder' => 'قالب های از پیش ساخته صفحه ورود مدیریت',
+				],
 				[
 					'type' => 'sectionend',
 					'id'   => 'admin_login_options',

@@ -32,6 +32,16 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 	/**
 	 * @var string
 	 */
+	protected string $match_mobile_card;
+
+	/**
+	 * @var string
+	 */
+	protected string $non_iran_host;
+
+	/**
+	 * @var string
+	 */
 	protected string $success_massage;
 
 	/**
@@ -50,11 +60,13 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 		$this->init_form_fields();
 		$this->init_settings();
 
-		$this->title           = $this->settings['title'];
-		$this->description     = $this->settings['description'];
-		$this->merchant        = $this->settings['merchantcode'];
-		$this->success_massage = $this->settings['success_massage'];
-		$this->failed_massage  = $this->settings['failed_massage'];
+		$this->title             = $this->settings['title'];
+		$this->description       = $this->settings['description'];
+		$this->merchant          = $this->settings['merchantcode'];
+		$this->match_mobile_card = $this->get_option( 'match_mobile_card', 'no' );
+		$this->non_iran_host     = $this->get_option( 'non_iran_host', 'no' );
+		$this->success_massage   = $this->settings['success_massage'];
+		$this->failed_massage    = $this->settings['failed_massage'];
 
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [
 			$this,
@@ -67,12 +79,12 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 
 	public function init_form_fields() {
 		$this->form_fields = [
-			'base_confing'    => [
+			'base_confing'      => [
 				'title'       => __( 'تنظیمات پایه ای', 'woocommerce' ),
 				'type'        => 'title',
 				'description' => '',
 			],
-			'enabled'         => [
+			'enabled'           => [
 				'title'       => __( 'فعالسازی/غیرفعالسازی', 'woocommerce' ),
 				'type'        => 'checkbox',
 				'label'       => __( 'فعالسازی درگاه زیبال', 'woocommerce' ),
@@ -80,44 +92,58 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 				'default'     => 'no',
 				'desc_tip'    => true,
 			],
-			'title'           => [
+			'title'             => [
 				'title'       => __( 'عنوان درگاه', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'عنوان درگاه که در طی خرید به مشتری نمایش داده میشود', 'woocommerce' ),
 				'default'     => __( 'پرداخت امن زیبال', 'woocommerce' ),
 				'desc_tip'    => true,
 			],
-			'description'     => [
+			'description'       => [
 				'title'       => __( 'توضیحات درگاه', 'woocommerce' ),
 				'type'        => 'text',
 				'desc_tip'    => true,
 				'description' => __( 'توضیحاتی که در طی عملیات پرداخت برای درگاه نمایش داده خواهد شد', 'woocommerce' ),
 				'default'     => __( 'پرداخت امن به وسیله کلیه کارت های عضو شتاب از طریق درگاه زیبال', 'woocommerce' ),
 			],
-			'account_confing' => [
+			'account_confing'   => [
 				'title'       => __( 'تنظیمات حساب زیبال', 'woocommerce' ),
 				'type'        => 'title',
 				'description' => '',
 			],
-			'merchantcode'    => [
+			'merchantcode'      => [
 				'title'       => __( 'مرچنت کد', 'woocommerce' ),
 				'type'        => 'text',
 				'description' => __( 'مرچنت کد درگاه زیبال - برای تست می‌توانید از مرچنت zibal استفاده کنید', 'woocommerce' ),
 				'default'     => '',
 				'desc_tip'    => true,
 			],
-			'payment_confing' => [
+			'match_mobile_card' => [
+				'title'       => 'تطبیق شماره موبایل با کارت',
+				'type'        => 'checkbox',
+				'label'       => 'تطبیق شماره موبایل با کارت',
+				'description' => 'در صورت تمایل به تطبیق مالک شماره موبایل و مالک کارت تیک بزنید.',
+				'default'     => 'no',
+			],
+			'non_iran_host'     => [
+				'title'       => 'هاست خارج از ایران',
+				'type'        => 'checkbox',
+				'label'       => 'هاست خارج از ایران',
+				'description' => 'در صورتی که هاست میزبانی شما خارج از ایران است، جهت اتصال بهتر تیک بزنید.',
+				'default'     => 'no',
+			],
+			'payment_confing'   => [
 				'title'       => __( 'تنظیمات عملیات پرداخت', 'woocommerce' ),
 				'type'        => 'title',
 				'description' => '',
 			],
-			'success_massage' => [
+			'success_massage'   => [
 				'title'       => __( 'پیام پرداخت موفق', 'woocommerce' ),
 				'type'        => 'textarea',
 				'description' => __( 'متن پیامی که میخواهید بعد از پرداخت موفق به کاربر نمایش دهید را وارد نمایید. همچنین می توانید از شورت کد {transaction_id} برای نمایش کد رهگیری (توکن) زیبال استفاده نمایید.', 'woocommerce' ),
 				'default'     => __( 'با تشکر از شما. سفارش شما با موفقیت پرداخت شد.', 'woocommerce' ),
 			],
-			'failed_massage'  => [
+			'failed_massage'    => [
 				'title'       => __( 'پیام پرداخت ناموفق', 'woocommerce' ),
 				'type'        => 'textarea',
 				'description' => __( 'متن پیامی که میخواهید بعد از پرداخت ناموفق به کاربر نمایش دهید را وارد نمایید. همچنین می توانید از شورت کد {fault} برای نمایش دلیل خطای رخ داده استفاده نمایید. این دلیل خطا از سایت زیبال ارسال می‌گردد.', 'woocommerce' ),
@@ -173,19 +199,23 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 		$data = [
 			'merchant'    => $this->merchant,
 			'amount'      => $amount,
-			'orderId'     => strval($order->get_id()),
+			'orderId'     => strval( $order->get_id() ),
 			'callbackUrl' => $callback_url,
 			'description' => $description,
 			'mobile'      => $mobile,
 			'reseller'    => 'woocommerce',
 		];
 
+		if ( $data['mobile'] && $this->match_mobile_card == 'yes' ) {
+			$data['checkMobileWithCard'] = true;
+		}
+
 		$result = $this->send_request( 'request', $data );
 
 		if ( is_array( $result ) && $result['result'] === 100 ) {
 			return [
 				'result'   => 'success',
-				'redirect' => sprintf( 'https://gateway.zibal.ir/start/%s', $result['trackId'] ),
+				'redirect' => sprintf( 'https://gateway.zibal.%s/start/%s', $this->get_tld(), $result['trackId'] ),
 			];
 		}
 
@@ -210,7 +240,7 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 	 * This function checks the currency type and converts the amount to Rials.
 	 *
 	 * @param string $currency The currency type ('irr', 'irt', 'irht', 'irhr').
-	 * @param int $amount The amount to be converted.
+	 * @param int    $amount   The amount to be converted.
 	 *
 	 * @return int The equivalent amount in Iranian Rials.
 	 */
@@ -233,15 +263,18 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 
 	/**
 	 * @param string $action
-	 * @param array $params
-	 * @param int $attempt
+	 * @param array  $params
+	 * @param int    $attempt
 	 *
 	 * @return ?array
 	 */
 	public function send_request( string $action, array $params, int $attempt = 0 ): ?array {
 
 		try {
-			$response = wp_safe_remote_post( 'https://gateway.zibal.ir/v1/' . $action, [
+
+			$url = sprintf( 'https://gateway.zibal.%s/v1/%s', $this->get_tld(), $action );
+
+			$response = wp_safe_remote_post( $url, [
 				'body'    => json_encode( $params ),
 				'headers' => [
 					'Content-Type' => 'application/json',
@@ -320,7 +353,7 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 
 		$data = [
 			'merchant' => $this->merchant,
-			'trackId'  => $track_id
+			'trackId'  => $track_id,
 		];
 
 		$result = $this->send_request( 'verify', $data );
@@ -347,7 +380,7 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 			$note    = wpautop( wptexturize( $message ) );
 
 			wc_add_notice( $note );
-			$order->update_status( 'on-hold', $note );
+			$order->update_status( 'success', $note );
 			wp_redirect( add_query_arg( 'wc_status', 'success', $this->get_return_url( $order ) ) );
 			exit;
 		}
@@ -360,13 +393,17 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 
 	}
 
+	private function get_tld(): string {
+		return $this->non_iran_host == 'yes' ? 'io' : 'ir';
+	}
+
 	/**
 	 * Handle failed payment by adding notices, order notes, and redirecting the user
 	 *
-	 * @param WC_Order $order The WooCommerce order object
-	 * @param string $message The failure message to be shown
-	 * @param string $track_id The transaction ID (if available)
-	 * @param string $fault The failure reason or fault message
+	 * @param WC_Order $order    The WooCommerce order object
+	 * @param string   $message  The failure message to be shown
+	 * @param string   $track_id The transaction ID (if available)
+	 * @param string   $fault    The failure reason or fault message
 	 *
 	 * @return void
 	 */
@@ -389,10 +426,10 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 	/**
 	 * Handle successful payment by updating the order and redirecting the user
 	 *
-	 * @param WC_Order $order The WooCommerce order object
-	 * @param string $track_id The transaction ID
-	 * @param string $card_number The card number used for payment
-	 * @param string $ref_number The reference number for the transaction
+	 * @param WC_Order $order       The WooCommerce order object
+	 * @param string   $track_id    The transaction ID
+	 * @param string   $card_number The card number used for payment
+	 * @param string   $ref_number  The reference number for the transaction
 	 *
 	 * @return void
 	 */
@@ -410,10 +447,10 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 		$lines = [
 			sprintf( __( 'پرداخت موفقیت آمیز بود.<br/> کد رهگیری: %s', 'woocommerce' ), $track_id ),
 			sprintf( __( ' شماره کارت پرداخت کننده: %s', 'woocommerce' ), $card_number ),
-			sprintf( __( ' شماره مرجع: %s', 'woocommerce' ), $ref_number )
+			sprintf( __( ' شماره مرجع: %s', 'woocommerce' ), $ref_number ),
 		];
 
-		$note  = implode( '<br/>', $lines );
+		$note = implode( '<br/>', $lines );
 		$order->add_order_note( $note, 1 );
 
 		$notice = wpautop( wptexturize( $this->success_massage ) );

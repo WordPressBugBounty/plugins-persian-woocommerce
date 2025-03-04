@@ -22,7 +22,7 @@ class Persian_Woocommerce_Widget extends Persian_Woocommerce_Core {
 			<?php $widget_options = $this->widget_options();
 
 			wp_widget_rss_output( [
-				'url'          => 'http://woocommerce.ir/feed/',
+				'url'          => 'https://woocommerce.ir/feed/',
 				'title'        => 'آخرین اخبار و اطلاعیه های ووکامرس پارسی',
 				'meta'         => [ 'target' => '_new' ],
 				'items'        => intval( $widget_options['posts_number'] ),

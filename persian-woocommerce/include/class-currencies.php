@@ -24,13 +24,12 @@ class Persian_Woocommerce_Currencies extends Persian_Woocommerce_Core {
 
 		add_filter( 'rank_math/snippet/rich_snippet_product_entity', [ $this, 'fix_prices_in_structured_data' ], 100 );
 		add_filter( 'rank_math/opengraph/facebook/product_price_amount', [ $this, 'convert_to_IRR' ], 100 );
-		add_filter( 'rank_math/opengraph/facebook/product_price_currency', function () {
-			return 'IRR';
-		}, 100 );
+		add_filter( 'rank_math/opengraph/facebook/product_price_currency', [ $this, 'currency_IRR' ], 100 );
+
+		add_filter( 'wpseo_schema_offer', [ $this, 'fix_prices_in_structured_data' ], 10, 3 );
 	}
 
 	public function currencies( array $currencies ): array {
-
 		return $this->currencies + $currencies;
 	}
 
@@ -59,11 +58,16 @@ class Persian_Woocommerce_Currencies extends Persian_Woocommerce_Core {
 		return $markup_offer;
 	}
 
+	public static function currency_IRR(): string {
+		return 'IRR';
+	}
+
 	public function convert_to_IRR( $price ): int {
 
 		$price = intval( $price );
 
-		if ( self::$currency == 'IRT' ) {
+		// Default currency is IRT also
+		if ( empty( self::$currency ) || self::$currency == 'IRT' ) {
 			return $price * 10;
 		}
 
@@ -77,6 +81,7 @@ class Persian_Woocommerce_Currencies extends Persian_Woocommerce_Core {
 
 		return $price;
 	}
+
 }
 
 new Persian_Woocommerce_Currencies();

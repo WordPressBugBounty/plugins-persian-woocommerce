@@ -250,8 +250,7 @@ class Persian_Woocommerce_Date {
 		global $wpdb;
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$order_dates = $wpdb->get_results(
-			sprintf( "
+		$order_dates = $wpdb->get_results( sprintf( "
 				SELECT date( post_date_gmt ) AS date, count(*) as count
 
 				FROM `%s`
@@ -263,8 +262,7 @@ class Persian_Woocommerce_Date {
 
 				GROUP BY date( post_date_gmt )
 				ORDER BY post_date_gmt DESC;
-			", $wpdb->posts )
-		);
+			", $wpdb->posts ) );
 
 		$dates = [];
 
@@ -307,13 +305,7 @@ class Persian_Woocommerce_Date {
 
 			foreach ( $months as $month => $count ) {
 
-				printf( '<option %s value="%d">%s %s (%s)</option>',
-					selected( $year . zeroise( $month, 2 ), $m, true ),
-					intval( $year . zeroise( $month, 2 ) ),
-					esc_attr( $month_names[ $month ] ),
-					esc_attr( CalendarUtils::convertNumbers( $year ) ),
-					esc_attr( CalendarUtils::convertNumbers( $count ) )
-				);
+				printf( '<option %s value="%d">%s %s (%s)</option>', selected( $year . zeroise( $month, 2 ), $m, true ), intval( $year . zeroise( $month, 2 ) ), esc_attr( $month_names[ $month ] ), esc_attr( CalendarUtils::convertNumbers( $year ) ), esc_attr( CalendarUtils::convertNumbers( $count ) ) );
 
 			}
 
@@ -322,11 +314,11 @@ class Persian_Woocommerce_Date {
 
 		echo '</select>';
 		?>
-		<style>
+        <style>
             #filter-by-date {
                 display: none;
             }
-		</style>
+        </style>
 		<?php
 	}
 
@@ -363,8 +355,7 @@ class Persian_Woocommerce_Date {
 		global $wpdb;
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$order_dates = $wpdb->get_results(
-			sprintf( "
+		$order_dates = $wpdb->get_results( sprintf( "
 				SELECT date( date_created_gmt ) AS date, count(*) as count
 
 				FROM `%s`
@@ -376,8 +367,7 @@ class Persian_Woocommerce_Date {
 
 				GROUP BY date( date_created_gmt )
 				ORDER BY date_created_gmt DESC;
-			", OrdersTableDataStore::get_orders_table_name() )
-		);
+			", OrdersTableDataStore::get_orders_table_name() ) );
 
 		$dates = [];
 
@@ -420,13 +410,7 @@ class Persian_Woocommerce_Date {
 
 			foreach ( $months as $month => $count ) {
 
-				printf( '<option %s value="%d">%s %s (%s)</option>',
-					selected( $year . zeroise( $month, 2 ), $m, true ),
-					intval( $year . zeroise( $month, 2 ) ),
-					esc_attr( $month_names[ $month ] ),
-					esc_attr( CalendarUtils::convertNumbers( $year ) ),
-					esc_attr( CalendarUtils::convertNumbers( $count ) )
-				);
+				printf( '<option %s value="%d">%s %s (%s)</option>', selected( $year . zeroise( $month, 2 ), $m, true ), intval( $year . zeroise( $month, 2 ) ), esc_attr( $month_names[ $month ] ), esc_attr( CalendarUtils::convertNumbers( $year ) ), esc_attr( CalendarUtils::convertNumbers( $count ) ) );
 
 			}
 
@@ -435,11 +419,11 @@ class Persian_Woocommerce_Date {
 
 		echo '</select>';
 		?>
-		<style>
+        <style>
             #filter-by-date {
                 display: none;
             }
-		</style>
+        </style>
 		<?php
 	}
 

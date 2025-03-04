@@ -44,5 +44,26 @@
             });
         }
 
+        // WooCommerce custom select dropdown with image
+        if ($(".pw_select_image_select").length) {
+            function update_image() {
+                let selected_option = $(".pw_select_image_select").find('option:selected');
+                let image_url = selected_option.data('image-attr');
+                let image_element = $('#selected_image');
+
+                if (image_url) {
+                    image_element.attr('src', image_url).show();
+                } else {
+                    image_element.hide();
+                }
+            }
+
+            $(".pw_select_image_select").on('change', function () {
+                update_image();
+            });
+
+            update_image();
+        }
+
     });
 })(jQuery);

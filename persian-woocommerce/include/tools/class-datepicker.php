@@ -8,6 +8,7 @@ if ( ! class_exists( 'PW_Tools_DatePicker' ) ) :
 		const SCREENS = [
 			'product'                     => 'product',
 			'shop_order'                  => 'shop_order',
+			'woocommerce_page_wc-orders'  => 'shop_order',
 			'shop_coupon'                 => 'shop_coupon',
 			'ووکامرس_page_wc-reports'     => 'report',
 			'woocommerce_page_wc-reports' => 'report',
@@ -55,48 +56,50 @@ if ( ! class_exists( 'PW_Tools_DatePicker' ) ) :
 		public function inline_js_product() {
 			?>
 			<script type="text/javascript">
-                jQuery(function ($) {
+                (function ($) {
+                    $(document).ready(function () {
+                        let _sale_price_dates_from = $("#_sale_price_dates_from").val();
 
-                    let _sale_price_dates_from = $("#_sale_price_dates_from").val();
-
-                    $("#_sale_price_dates_from").persianDatepicker({
-                        formatDate: "YYYY-0M-0D",
-                        selectedBefore: _sale_price_dates_from.length ? 1 : 0,
-                        selectedDate: _sale_price_dates_from.length ? _sale_price_dates_from.replace(/-/gi, "/") : null
-                    });
-
-                    let _sale_price_dates_to = $("#_sale_price_dates_to").val();
-
-                    $("#_sale_price_dates_to").persianDatepicker({
-                        formatDate: "YYYY-0M-0D",
-                        selectedBefore: _sale_price_dates_to.length ? 1 : 0,
-                        selectedDate: _sale_price_dates_to.length ? _sale_price_dates_to.replace(/-/gi, "/") : null
-                    });
-
-                    $("div.woocommerce_variations").on("click", "a.sale_schedule", function () {
-                        let el_to = $(this).parent().parent().next().find("input[name*=to]");
-
-                        let el_date_to = el_to.val();
-
-                        el_to.persianDatepicker({
+                        $("#_sale_price_dates_from").persianDatepicker({
                             formatDate: "YYYY-0M-0D",
-                            selectedBefore: el_date_to.length ? 1 : 0,
-                            selectedDate: el_date_to.length ? el_date_to.replace(/-/gi, "/") : null
+                            selectedBefore: _sale_price_dates_from.length ? 1 : 0,
+                            selectedDate: _sale_price_dates_from.length ? _sale_price_dates_from.replace(/-/gi, "/") : null
                         });
 
-                        let el_from = $(this).parent().parent().next().find("input[name*=from]");
+                        let _sale_price_dates_to = $("#_sale_price_dates_to").val();
 
-                        let el_date_from = el_from.val();
-
-                        el_from.persianDatepicker({
+                        $("#_sale_price_dates_to").persianDatepicker({
                             formatDate: "YYYY-0M-0D",
-                            selectedBefore: el_date_from.length ? 1 : 0,
-                            selectedDate: el_date_from.length ? el_date_from.replace(/-/gi, "/") : null
+                            selectedBefore: _sale_price_dates_to.length ? 1 : 0,
+                            selectedDate: _sale_price_dates_to.length ? _sale_price_dates_to.replace(/-/gi, "/") : null
                         });
 
+                        $("div.woocommerce_variations").on("click", "a.sale_schedule", function () {
+                            let el_to = $(this).parent().parent().next().find("input[name*=to]");
+
+                            let el_date_to = el_to.val();
+
+                            el_to.persianDatepicker({
+                                formatDate: "YYYY-0M-0D",
+                                selectedBefore: el_date_to.length ? 1 : 0,
+                                selectedDate: el_date_to.length ? el_date_to.replace(/-/gi, "/") : null
+                            });
+
+                            let el_from = $(this).parent().parent().next().find("input[name*=from]");
+
+                            let el_date_from = el_from.val();
+
+                            el_from.persianDatepicker({
+                                formatDate: "YYYY-0M-0D",
+                                selectedBefore: el_date_from.length ? 1 : 0,
+                                selectedDate: el_date_from.length ? el_date_from.replace(/-/gi, "/") : null
+                            });
+
+                        });
                     });
 
-                });
+                })(jQuery)
+
 			</script>
 			<?php
 		}

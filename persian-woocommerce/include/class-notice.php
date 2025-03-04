@@ -26,12 +26,12 @@ class Persian_Woocommerce_Notice {
 				continue;
 			}
 
-			$notice_content = strip_tags( $notice['content'], '<p><a><input><b><img><ul><ol><li>' );
+			$dismissible    = $notice['dismiss'] ? 'is-dismissible' : '';
+			$notice_id      = esc_attr( $notice['id'] );
+			$notice_content = strip_tags( $notice['content'], '<p><a><b><img><ul><ol><li>' );
 
-			printf( '<div class="notice pw_notice notice-success %s" id="pw_%s"><p>%s</p></div>',
-				esc_attr( $notice['dismiss'] ? 'is-dismissible' : '' ),
-				esc_attr( $notice['id'] ),
-				strip_tags( $notice['content'], '<p><a><input><b><img><ul><ol><li>' ) );
+			printf( '<div class="notice pw_notice notice-success %s" id="pw_%s"><p>%s</p></div>', $dismissible,
+				$notice_id, $notice_content );
 
 			break;
 		}
@@ -40,16 +40,16 @@ class Persian_Woocommerce_Notice {
 		<script type="text/javascript">
             jQuery(document).ready(function ($) {
 
-                $(document.body).on('click', '.notice-dismiss', function () {
+                jQuery(document.body).on('click', '.notice-dismiss', function () {
 
-                    let notice = $(this).closest('.pw_notice');
+                    let notice = jQuery(this).closest('.pw_notice');
                     notice = notice.attr('id');
 
                     if (notice !== undefined && notice.indexOf('pw_') !== -1) {
 
                         notice = notice.replace('pw_', '');
 
-                        $.ajax({
+                        jQuery.ajax({
                             url: "<?php echo esc_url( admin_url( 'admin-ajax.php' ) ) ?>",
                             type: 'post',
                             data: {
@@ -62,7 +62,19 @@ class Persian_Woocommerce_Notice {
 
                 });
 
-                $.ajax({
+            });
+		</script>
+		<?php
+
+		if ( get_transient( 'pw_update_notices' ) ) {
+			return;
+		}
+
+		?>
+		<script type="text/javascript">
+            jQuery(document).ready(function ($) {
+
+                jQuery.ajax({
                     url: "<?php echo esc_url( admin_url( 'admin-ajax.php' ) ) ?>",
                     type: 'post',
                     data: {
@@ -70,6 +82,7 @@ class Persian_Woocommerce_Notice {
                         nonce: '<?php echo wp_create_nonce( 'pw_update_notice' ); ?>'
                     }
                 });
+
             });
 		</script>
 		<?php
@@ -247,7 +260,7 @@ class Persian_Woocommerce_Notice {
 			return;
 		}
 
-		set_transient( 'pw_update_notices', 1, DAY_IN_SECONDS / 4 );
+		set_transient( 'pw_update_notices', 1, HOUR_IN_SECONDS );
 
 		check_ajax_referer( 'pw_update_notice', 'nonce' );
 

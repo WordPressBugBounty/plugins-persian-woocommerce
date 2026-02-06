@@ -17,7 +17,7 @@ if ( ! class_exists( 'PW_Tools_DatePicker' ) ) :
 
 		public function __construct() {
 
-			if ( PW()->get_options( 'enable_jalali_datepicker', 'no' ) == 'yes' ) {
+			if ( PW()->get_options( 'enable_jalali_datepicker', 'yes' ) == 'yes' ) {
 				add_action( 'admin_enqueue_scripts', [ $this, 'datepicker' ], 1000 );
 				add_action( 'admin_print_footer_scripts', [ $this, 'inline_js' ] );
 			}

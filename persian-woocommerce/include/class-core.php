@@ -47,6 +47,15 @@ class Persian_Woocommerce_Core {
 
 	public function plugins_loaded() {
 		require_once( 'class-gateways.php' );
+
+		// Zibal payment gateway block registration
+		add_action(
+			'woocommerce_blocks_payment_method_type_registration',
+			function ( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+				$payment_method_registry->register( new Persian_Woocommerce_Zibal_Block() );
+			}
+		);
+
 	}
 
 	public function admin_menus() {
@@ -81,12 +90,6 @@ class Persian_Woocommerce_Core {
 				'slug'       => esc_url( admin_url( 'admin.php?page=persian-wc-tools&tab=super_admin' ) ),
 				'callback'   => '',
 			],
-			30 => [
-				'title'      => 'افزونه ها',
-				'capability' => 'manage_woocommerce',
-				'slug'       => 'persian-wc-plugins',
-				'callback'   => [ $this, 'plugins_page', ],
-			],
 			45 => [
 				'title'      => 'ملی پیامک',
 				'capability' => 'manage_woocommerce',
@@ -94,7 +97,7 @@ class Persian_Woocommerce_Core {
 				'callback'   => [ $this, 'melipayamak_page', ],
 			],
 			50 => [
-				'title'      => 'پیشخوان پست تاپین',
+				'title'      => 'تاپین | باجه مجازی پستی',
 				'capability' => 'manage_woocommerce',
 				'slug'       => 'https://yun.ir/pwtm',
 				'callback'   => '',
@@ -112,26 +115,16 @@ class Persian_Woocommerce_Core {
 		foreach ( $submenus as $submenu ) {
 			add_submenu_page( 'persian-wc', $submenu['title'], $submenu['title'], $submenu['capability'], $submenu['slug'], $submenu['callback'] );
 		}
-
-		add_submenu_page( 'woocommerce', 'افزونه های پارسی', 'افزونه های پارسی', 'manage_woocommerce', 'wc-persian-plugins', [
-			$this,
-			'plugins_page',
-		] );
 	}
 
 	public function admin_head() {
 		?>
-        <script type="text/javascript">
+		<script type="text/javascript">
             jQuery(document).ready(function ($) {
                 $("ul#adminmenu a[href$='https://yun.ir/pwtm']").attr('target', '_blank');
             });
-        </script>
+		</script>
 		<?php
-	}
-
-	public function plugins_page() {
-		wp_enqueue_style( 'woocommerce_admin_styles' );
-		include( 'view/html-admin-page-plugins.php' );
 	}
 
 	public function about_page() {
@@ -238,6 +231,7 @@ class Persian_Woocommerce_Core {
 
 		return $this->options[ $option_name ] ?? $default;
 	}
+
 
 }
 

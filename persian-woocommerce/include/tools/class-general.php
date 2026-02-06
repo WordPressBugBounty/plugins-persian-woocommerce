@@ -7,11 +7,7 @@ class PW_Tools_General {
 	public function __construct() {
 		add_filter( 'pre_get_posts', [ $this, 'fix_arabic_characters' ] );
 
-		if ( PW()->get_options( 'fix_load_states', 'no' ) != 'no' ) {
-			add_action( 'wp_footer', [ $this, 'checkout_state_dropdown_fix' ], 50 );
-		}
-
-		if ( PW()->get_options( 'fix_postcode_persian_number', 'no' ) != 'no' ) {
+		if ( PW()->get_options( 'fix_postcode_persian_number', 'yes' ) != 'no' ) {
 			add_filter( 'woocommerce_checkout_process', [ $this, 'checkout_process_postcode' ], 20, 1 );
 		}
 
@@ -19,35 +15,18 @@ class PW_Tools_General {
 			add_filter( 'woocommerce_validate_postcode', [ $this, 'validate_postcode' ], 10, 3 );
 		}
 
-		if ( PW()->get_options( 'fix_phone_persian_number', 'no' ) != 'no' ) {
+		if ( PW()->get_options( 'fix_phone_persian_number', 'yes' ) != 'no' ) {
 			add_filter( 'woocommerce_checkout_process', [ $this, 'checkout_process_phone' ], 20, 1 );
 		}
 	}
 
-	function fix_arabic_characters( $query ) {
+	public function fix_arabic_characters( $query ) {
 
 		if ( $query->is_search ) {
 			$query->set( 's', str_replace( [ 'ك', 'ي', ], [ 'ک', 'ی' ], $query->get( 's' ) ) );
 		}
 
 		return $query;
-	}
-
-	function checkout_state_dropdown_fix() {
-
-		if ( function_exists( 'is_checkout' ) && ! is_checkout() ) {
-			return;
-		}
-
-		?>
-		<script>
-            jQuery(function () {
-                // Snippets.ir
-                jQuery('#billing_country').trigger('change');
-                jQuery('#billing_state_field').removeClass('woocommerce-invalid');
-            });
-		</script>
-		<?php
 	}
 
 	function checkout_process_postcode() {
@@ -65,7 +44,7 @@ class PW_Tools_General {
 		}
 	}
 
-	function validate_postcode( $valid, $postcode, $country ): bool {
+	public function validate_postcode( $valid, $postcode, $country ): bool {
 
 		if ( $country != 'IR' ) {
 			return $valid;
@@ -74,7 +53,7 @@ class PW_Tools_General {
 		return (bool) preg_match( '/^([0-9]{10})$/', $postcode );
 	}
 
-	function checkout_process_phone() {
+	public function checkout_process_phone() {
 
 		if ( isset( $_POST['billing_phone'] ) ) {
 			$_POST['billing_phone'] = self::en( sanitize_text_field( $_POST['billing_phone'] ) );
@@ -86,18 +65,30 @@ class PW_Tools_General {
 
 	}
 
-	function validate_phone( $data, $errors ) {
+	public function validate_phone( $data, $errors ) {
 
-		if ( (bool) preg_match( '/^(09[0-9]{9})$/', $data['billing_phone'] ) ) {
-			return false;
+		if ( ! empty( $data['billing_phone'] ) && ! (bool) preg_match( '/^(\+989|989|09)[0-9]{9}$/', $data['billing_phone'] ) ) {
+			$errors->add( 'validation', '<b>تلفن همراه (صورتحساب)</b> وارد شده، معتبر نمی باشد.' );
 		}
 
-		$errors->add( 'validation', '<b>تلفن همراه</b> وارد شده، معتبر نمی باشد.' );
+		if ( ! empty( $data['shipping_phone'] ) && ! (bool) preg_match( '/^(\+989|989|09)[0-9]{9}$/', $data['shipping_phone'] ) ) {
+			$errors->add( 'validation', '<b>تلفن همراه (حمل و نقل)</b> وارد شده، معتبر نمی باشد.' );
+		}
+
 	}
 
 	private static function en( $number ) {
-		return str_replace( [ '۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹' ], range( 0, 9 ), $number );
+		$persian        = [ '۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹' ];
+		$arabic         = [ '٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩' ];
+		$english_digits = range( 0, 9 );
+
+		// Replace Persian numerals
+		$number = str_replace( $persian, $english_digits, $number );
+
+		// Replace Arabic numerals
+		return str_replace( $arabic, $english_digits, $number );
 	}
+
 }
 
 new PW_Tools_General();

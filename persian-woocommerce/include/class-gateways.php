@@ -10,6 +10,7 @@ if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
 }
 
 include 'gateways/class-zibal.php';
+include 'gateways/class-zibal-block.php';
 
 if ( class_exists( 'Persian_Woocommerce_Gateways' ) ) {
 	return;
@@ -174,7 +175,7 @@ abstract class Persian_Woocommerce_Gateways extends WC_Payment_Gateway {
 		if ( $form ) {
 			?>
 			<form action="" method="POST" class="pw-gateway-checkout-form"
-				  id="pw-gateway-checkout-form-<?php echo esc_attr( $this->id ); ?>">
+			      id="pw-gateway-checkout-form-<?php echo esc_attr( $this->id ); ?>">
 				<input type="submit" name="pw-gateway-submit" class="pw-gateway-submit button alt" value="پرداخت"/>
 				<a class="pw-gateway-cancel button cancel"
 				   href="<?php echo esc_url( $this->get_checkout_url() ); ?>">بازگشت</a>
@@ -452,14 +453,18 @@ abstract class Persian_Woocommerce_Gateways extends WC_Payment_Gateway {
 	}
 
 	protected function get_shortcodes_values(): array {
-
 		$shortcodes = [];
-
-		$order = $this->get_order();
+		$order      = $this->get_order();
 
 		foreach ( $this->fields_shortcodes() as $key => $value ) {
-			$key                = trim( $key, '\{\}' );
-			$shortcodes[ $key ] = $order->get_meta( '_' . $key );
+			$clean_key = trim( $key, '\{\}' );
+			$getter    = 'get_' . $clean_key;
+
+			if ( is_callable( [ $order, $getter ] ) ) {
+				$shortcodes[ $clean_key ] = $order->$getter();
+			} else {
+				$shortcodes[ $clean_key ] = $order->get_meta( '_' . $clean_key );
+			}
 		}
 
 		return $shortcodes;

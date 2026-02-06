@@ -26,7 +26,7 @@ class PW_Super_Admin {
 		add_filter( 'woocommerce_allow_marketplace_suggestions', '__return_false' );
 		// Woocommerce.com
 
-		if ( PW()->get_options( 'super_admin_boost_woo', 'no' ) == 'yes' ) {
+		if ( PW()->get_options( 'super_admin_boost_woo', 'yes' ) == 'yes' ) {
 
 			add_action( 'admin_menu', function () {
 				foreach ( get_post_types( '', 'names' ) as $post_type ) {
@@ -46,7 +46,7 @@ class PW_Super_Admin {
 			$this->blocked_url['woocommerce.com/wp-json/wccom/payment-gateway-suggestions/1.0/suggestions.json']               = '[]';
 		}
 
-		if ( PW()->get_options( 'super_admin_boost_dashboard', 'no' ) == 'yes' ) {
+		if ( PW()->get_options( 'super_admin_boost_dashboard', 'yes' ) == 'yes' ) {
 			$this->blocked_url['api.wordpress.org/core/browse-happy/1.1'] = '[]';
 			$this->blocked_url['api.wordpress.org/core/serve-happy/1.0']  = '[]';
 		}
@@ -75,14 +75,14 @@ class PW_Super_Admin {
 				'title'   => 'افزایش سرعت ووکامرس',
 				'id'      => 'PW_Options[super_admin_boost_woo]',
 				'type'    => 'checkbox',
-				'default' => 'no',
+				'default' => 'yes',
 				'desc'    => 'بهبود سرعت هسته و سفارشات ووکامرس',
 			],
 			[
 				'title'   => 'افزایش سرعت پیشخوان',
 				'id'      => 'PW_Options[super_admin_boost_dashboard]',
 				'type'    => 'checkbox',
-				'default' => 'no',
+				'default' => 'yes',
 				'desc'    => 'افزایش سرعت آنالیزهای پیشخوان وردپرس',
 			],
 

@@ -2869,6 +2869,7 @@ function Persian_Woo_iranCities(province) {
             cities[11] = ['صفادشت', '5615'];
             cities[12] = ['فردوسیه', '5616'];
             cities[6] = ['چهارباغ', '5617'];
+            cities[13] = ['فردیس', '5619'];
             break;
 
         default:

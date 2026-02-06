@@ -196,3 +196,25 @@
     color: #ffffff;
     text-decoration: overline;
 }
+
+
+/**
+*###### WooCommerce Order details ltr date inputs
+*/
+#order_data > div.order_data_column_container > div:nth-child(1) > p:nth-child(2):has(> .hasDatepicker) label {
+    width: 100%;
+}
+
+#order_data > div.order_data_column_container > div:nth-child(1) > p:nth-child(2):has(> .hasDatepicker) {
+    display: flex;
+    flex-direction: row-reverse;
+    flex-wrap: wrap;
+    justify-content: left;
+    align-items: center;
+    gap: 5px;
+    direction: rtl;
+}
+
+#order_data > div.order_data_column_container > div:nth-child(1) > p:nth-child(2):has(> .hasDatepicker) input {
+    text-align: left;
+}

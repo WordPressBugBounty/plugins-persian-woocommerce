@@ -709,7 +709,8 @@ class CalendarUtils
                 $regex .= '(?P<' . $keys[$char][0] . '>' . $keys[$char][1] . ')';
             } else {
                 if ('\\' == $char) {
-                    $regex .= $char;
+					// Persian Woocommerce: The \\ will escape to \ and causes error
+	                $regex .= $char.$char; // OR '\\\\'
                 } else {
                     $regex .= preg_quote($char);
                 }
@@ -740,8 +741,9 @@ class CalendarUtils
         $dt['zone'] = 0;
         $dt['is_dst'] = '';
 
-        if (strlen($dt['year']) == 2) {
-            $now = Jalalian::forge('now');
+		// Persian Woocommerce: The index checking is required
+	    if (isset($dt['year']) && strlen($dt['year']) == 2) {
+		    $now = Jalalian::forge('now');
             $x = $now->format('Y') - $now->format('y');
             $dt['year'] += $x;
         }

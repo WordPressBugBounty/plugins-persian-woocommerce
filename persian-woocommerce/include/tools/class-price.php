@@ -29,8 +29,7 @@ if ( ! class_exists( 'PW_Tools_Price' ) ) :
 				add_action( 'woocommerce_before_cart', [ $this, 'wc_minimum_order_amount' ] );
 			}
 
-			if ( PW()->get_options( 'variable_price', 'range' ) != 'range' ) {
-				add_action( 'woocommerce_variable_sale_price_html', [ $this, 'get_variation_price_format' ], 10, 2 );
+			if ( PW()->get_options( 'variable_price', 'range' ) == 'min' ) {
 				add_action( 'woocommerce_variable_price_html', [ $this, 'get_variation_price_format' ], 10, 2 );
 				add_action( 'woocommerce_dropdown_variation_attribute_options_args', [
 					$this,
@@ -90,13 +89,17 @@ if ( ! class_exists( 'PW_Tools_Price' ) ) :
 
 		public function get_variation_price_format( string $price, WC_Product $product ): string {
 
-			[ $min_or_max, $type ] = explode( '_', PW()->get_options( 'variable_price' ) );
+			$prices = $product->get_variation_prices();
 
-			// Validation
-			$min_or_max = $min_or_max == 'min' ? 'min' : 'max';
-			$type       = $type == 'regular' ? 'regular' : 'sale';
+			$min_sale_price    = current( $prices['sale_price'] );
+			$variation_id      = key( $prices['sale_price'] );
+			$min_regular_price = $prices['regular_price'][ $variation_id ];
 
-			return wc_price( $product->{"get_variation_{$type}_price"}( $min_or_max ) );
+			if ( $min_sale_price == $min_regular_price ) {
+				return wc_price( $min_sale_price );
+			}
+
+			return wc_format_sale_price( $min_regular_price, $min_sale_price );
 		}
 
 		public function remove_dropdown_variation_options( array $args ): array {

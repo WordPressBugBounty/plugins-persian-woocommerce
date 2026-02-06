@@ -182,3 +182,7 @@
 .pw_select_image_select:focus {
     border-color: #96588a;
 }
+
+th.titledesc:has(> label[for="PW_Options[admin_login_template]"]) {
+    vertical-align: middle !important;
+}

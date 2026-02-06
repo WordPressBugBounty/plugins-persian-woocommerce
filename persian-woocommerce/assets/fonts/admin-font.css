@@ -17,10 +17,14 @@ body#tinymce.wp-editor.content dt, body, a, p, div, input, span, h1, h2, h3, h4,
 }
 
 #wpbody, h1, h2, h3, h4, h5, h6, .persian-woocommerce h1, .persian-woocommerce h2, .persian-woocommerce h3,
-.persian-woocommerce h4, .persian-woocommerce h5, .persian-woocommerce h6 {
+.persian-woocommerce h4, .persian-woocommerce h5, .persian-woocommerce h6,
+body.woocommerce_page_wc-settings .nav-tab-wrapper a {
     font-family: var(--pw-admin-font-family) !important;
 }
 
-
+/* Yoast seo preview title vanishes with custom fonts */
+#yoast-snippet-preview-container * {
+    font-family: sans-serif !important;
+}
 
 

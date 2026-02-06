@@ -121,7 +121,7 @@ class PW_Tools_Design {
 	 * @return void
 	 */
 	public function init_admin_font(): void {
-		$this->admin_font_family = PW()->get_options( 'admin_font_family', 'none' );
+		$this->admin_font_family = PW()->get_options( 'admin_font_family', 'iransans' );
 
 		// 'none' Disables the font feature
 		if ( $this->admin_font_family == 'none' ) {

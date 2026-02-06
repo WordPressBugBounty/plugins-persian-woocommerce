@@ -2,18 +2,18 @@
 /**
  * Plugin Name: ووکامرس فارسی
  * Plugin URI: https://woosupport.ir
- * Description: بسته فارسی ساز ووکامرس پارسی به راحتی سیستم فروشگاه ساز ووکامرس را فارسی می کند. با فعال سازی افزونه ، بسیاری از قابلیت های مخصوص ایران به افزونه افزوده می شوند. پشتیبانی در <a href="http://woosupport.ir" target="_blank">ووکامرس پارسی</a>.
- * Version: 9.3.0
+ * Description: بسته فارسی ساز ووکامرس فارسی به راحتی سیستم فروشگاه ساز ووکامرس را فارسی می کند. با فعال سازی افزونه ، بسیاری از قابلیت های مخصوص ایران به افزونه افزوده می شوند. پشتیبانی در <a href="http://woosupport.ir" target="_blank">ووکامرس فارسی</a>.
+ * Version: 9.3.4
  * Author: ووکامرس فارسی
  * Author URI: https://woosupport.ir
  * WC requires at least: 7.0.0
- * WC tested up to: 9.7.0
+ * WC tested up to: 10.3.5
  */
 
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'PW_VERSION' ) ) {
-	define( 'PW_VERSION', '9.3.0' );
+	define( 'PW_VERSION', '9.3.4' );
 }
 
 if ( ! defined( 'PW_DIR' ) ) {
@@ -46,6 +46,7 @@ add_action( 'woocommerce_loaded', function () {
 	require_once( 'include/class-address.php' );
 	require_once( 'include/class-currencies.php' );
 	require_once( 'include/class-notice.php' );
+	require_once( 'include/class-changelog.php' );
 
 } );
 
@@ -55,7 +56,7 @@ register_activation_hook( PW_FILE, function () {
 	file_put_contents( PW_DIR . '/.activated', '' );
 } );
 
-add_action( 'before_woocommerce_init', function() {
+add_action( 'before_woocommerce_init', function () {
 	if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
 		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
 	}

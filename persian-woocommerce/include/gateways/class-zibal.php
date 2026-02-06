@@ -172,18 +172,12 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 	 */
 	public function process_payment( $order_id ) {
 
-		$order    = wc_get_order( $order_id );
-		$currency = $order->get_currency();
-		$amount   = intval( $order->get_total() );
-		$amount   = $this->convert_to_rial( $currency, $amount );
+		$order = wc_get_order( $order_id );
 
-		$callback_url = add_query_arg( 'wc_order', $order_id, WC()->api_request_url( $this->id ) );
-
-		// Zibal Hash Secure Code
-		$hash         = md5( $order_id . NONCE_SALT );
-		$callback_url = add_query_arg( 'secure', $hash, $callback_url );
-
-		$description = 'خریدار: ' . $order->get_formatted_billing_full_name();
+		$callback_url = add_query_arg( [
+			'wc_order' => $order_id,
+			'secure'   => md5( $order_id . NONCE_SALT ),
+		], WC()->api_request_url( $this->id ) );
 
 		$mobile = $order->get_billing_phone();
 
@@ -196,9 +190,23 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 			}
 		}
 
+		$products = [];
+
+		foreach ( $order->get_items() as $item ) {
+
+			$name       = $item->get_name();
+			$qty        = $item->get_quantity();
+			$products[] = "{$name} ({$qty})";
+
+		}
+
+		$products    = implode( ' - ', $products );
+		$full_name   = $order->get_formatted_billing_full_name();
+		$description = "خریدار: {$full_name} | محصولات: {$products}";
+
 		$data = [
 			'merchant'    => $this->merchant,
-			'amount'      => $amount,
+			'amount'      => $this->get_order_total_rial( $order ),
 			'orderId'     => strval( $order->get_id() ),
 			'callbackUrl' => $callback_url,
 			'description' => $description,
@@ -235,30 +243,26 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Convert the given amount to Iranian Rials based on the order currency type.
+	 * @param WC_Order $order
 	 *
-	 * This function checks the currency type and converts the amount to Rials.
-	 *
-	 * @param string $currency The currency type ('irr', 'irt', 'irht', 'irhr').
-	 * @param int    $amount   The amount to be converted.
-	 *
-	 * @return int The equivalent amount in Iranian Rials.
+	 * @return int
 	 */
-	public function convert_to_rial( string $currency, int $amount ): int {
-		$rial_amount = $amount;
-		$currency    = strtolower( $currency );
+	public function get_order_total_rial( WC_Order $order ): int {
+
+		$currency = $order->get_currency();
+		$amount   = intval( $order->get_total() );
+
+		$currency = strtolower( $currency );
 
 		if ( $currency == 'irt' ) {
-			$rial_amount = $amount * 10;
+			$amount *= 10;
 		} elseif ( $currency == 'irht' ) {
-			$rial_amount = $amount * 1000 * 10;
+			$amount *= 10_000;
 		} elseif ( $currency == 'irhr' ) {
-			$rial_amount = $amount * 1000;
-		} else {
-			return $rial_amount;
+			$amount *= 1_000;
 		}
 
-		return trim( $rial_amount );
+		return $amount;
 	}
 
 	/**
@@ -279,6 +283,7 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 				'headers' => [
 					'Content-Type' => 'application/json',
 				],
+				'timeout' => 10,
 			] );
 
 			if ( is_wp_error( $response ) ) {
@@ -304,8 +309,8 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 
 	public function webhook() {
 
-		$order_id = sanitize_text_field( $_GET['wc_order'] ?? 0 );
-		$success  = sanitize_text_field( $_GET['success'] ?? 0 );
+		$order_id = intval( $_GET['wc_order'] ?? 0 );
+		$success  = intval( $_GET['success'] ?? 0 );
 		$track_id = sanitize_text_field( $_GET['trackId'] ?? 0 );
 		$secure   = sanitize_text_field( $_GET['secure'] ?? 0 );
 
@@ -324,16 +329,12 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 		$hash = md5( $order_id . NONCE_SALT );
 
 		if ( $secure != $hash ) {
-			wp_die( 'سفارش وجود ندارد.' );
+			wp_die( 'کلید امنیتی معتبر نمی‌باشد.' );
 		}
 
-		$order    = wc_get_order( $order_id );
-		$currency = $order->get_currency();
-		$amount   = intval( $order->get_total() );
-		$amount   = $this->convert_to_rial( $currency, $amount );
+		$order = wc_get_order( $order_id );
 
-
-		if ( $order->is_paid() ) {
+		if ( ! $order->needs_payment() ) {
 
 			$track_id = $order->get_transaction_id();
 			$notice   = wpautop( wptexturize( $this->success_massage ) );
@@ -344,16 +345,17 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 			exit;
 		}
 
-		if ( $success !== '1' ) {
+		if ( $success !== 1 ) {
 			$fault   = '';
-			$message = 'تراکنش انجام نشد.';
+			$message = 'تراکنش لغو شد.';
 			$this->handle_failed_payment( $order, $message, $track_id, $fault );
 			exit;
 		}
 
 		$data = [
-			'merchant' => $this->merchant,
-			'trackId'  => $track_id,
+			'merchant'           => $this->merchant,
+			'trackId'            => $track_id,
+			'dataOnDoubleVerify' => true,
 		];
 
 		$result = $this->send_request( 'verify', $data );
@@ -366,22 +368,14 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 			exit;
 		}
 
-		if ( $result['result'] === 100 && $result['amount'] === $amount ) {
+		if ( in_array( $result['result'], [ 100, 201 ] ) &&
+		     $result['amount'] == $this->get_order_total_rial( $order ) &&
+		     $result['orderId'] == $order->get_id()
+		) {
 			// Successful payment
 			$card_number = $result['cardNumber'] ?? '';
 			$ref_number  = $result['refNumber'] ?? '';
 			$this->handle_successful_payment( $order, $track_id, $card_number, $ref_number );
-			exit;
-		}
-
-		if ( $result['result'] === 201 ) {
-			// Duplicate payment scenario
-			$message = 'این تراکنش قبلا تایید شده است.';
-			$note    = wpautop( wptexturize( $message ) );
-
-			wc_add_notice( $note );
-			$order->update_status( 'success', $note );
-			wp_redirect( add_query_arg( 'wc_status', 'success', $this->get_return_url( $order ) ) );
 			exit;
 		}
 
@@ -435,7 +429,7 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 	 */
 	private function handle_successful_payment( WC_Order $order, string $track_id = '', string $card_number = '', string $ref_number = '' ): void {
 
-		$order->update_meta_data( '_transaction_id', $track_id );
+		$order->set_transaction_id( strval( $track_id ) );
 		$order->update_meta_data( 'zibal_payment_card_number', $card_number );
 		$order->update_meta_data( 'zibal_payment_ref_number', $ref_number );
 		$order->save_meta_data();

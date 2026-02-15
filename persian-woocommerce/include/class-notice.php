@@ -106,11 +106,11 @@ class Persian_Woocommerce_Notice {
 
 		$notices = [
 			[
-				'id'        => 'gateland',
-				'content'   => sprintf( '<b>افزونه درگاه پرداخت هوشمند گیت لند: </b> ۳۷ درگاه مستقیم و غیرمستقیم + درگاه‌های اعتباری، فقط در یک افزونه. <a href="%s" target="_blank"><input type="button" class="button button-primary" value="نصب سریع و رایگان از مخزن وردپرس"></a>',
+				'id'        => '_gateland',
+				'content'   => sprintf( '<b>افزونه درگاه پرداخت هوشمند گیت لند: </b> ۴۱ درگاه مستقیم و غیرمستقیم + درگاه‌های اعتباری، فقط در یک افزونه. <a href="%s" target="_blank"><input type="button" class="button button-primary" value="نصب سریع و رایگان از مخزن وردپرس"></a>',
 					$gateland_install_url ),
 				'condition' => $gateland_install_url,
-				'dismiss'   => 6 * MONTH_IN_SECONDS,
+				'dismiss'   => 2 * MONTH_IN_SECONDS,
 			],
 			[
 				'id'        => 'tapin-orders',
@@ -143,7 +143,7 @@ class Persian_Woocommerce_Notice {
 			[
 				'id'        => 'tapin-tools',
 				'content'   => '
-			<a href="https://yun.ir/pwtt" target="_blank">
+			<a href="https://hits.ir/tapin" target="_blank">
 				<img src="' . PW()->plugin_url( 'assets/images/tapin.png' ) . '" style="width: 100%" alt="تاپین">
 			</a>',
 				'condition' => $page == 'persian-wc-tools' && ! $has_shipping,

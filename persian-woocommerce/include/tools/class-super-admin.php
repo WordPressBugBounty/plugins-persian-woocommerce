@@ -51,9 +51,15 @@ class PW_Super_Admin {
 			$this->blocked_url['api.wordpress.org/core/serve-happy/1.0']  = '[]';
 		}
 
-		if ( $this->blocked_url ) {
-			add_filter( 'pre_http_request', [ $this, 'pre_http_request' ], 1000, 3 );
-		}
+		// 403 URLs in IRAN
+		$this->blocked_url['my.elementor.com/api/v2/info']     = '[]';
+		$this->blocked_url['my.elementor.com/api/v2/pro/info'] = '[]';
+		$this->blocked_url['yithemes.com/latest-updates/feed'] = '[]';
+		$this->blocked_url['yithemes.com/feed']                = '[]';
+		$this->blocked_url['jetpack.wordpress.com/xmlrpc.php'] = '[]';
+		$this->blocked_url['rankmath.com/wp-json/wp/v2/posts'] = '[]';
+
+		add_filter( 'pre_http_request', [ $this, 'pre_http_request' ], 1000, 3 );
 	}
 
 	public function tabs( array $tabs ): array {
@@ -103,7 +109,7 @@ class PW_Super_Admin {
 
 		$url = trim( parse_url( $url, PHP_URL_HOST ) . parse_url( $url, PHP_URL_PATH ), '/' );
 
-		if ( isset( $this->blocked_url[ $url ] ) ) {
+		if ( array_key_exists( $url, $this->blocked_url ) ) {
 			return [
 				'headers'       => [],
 				'body'          => $this->blocked_url[ $url ],

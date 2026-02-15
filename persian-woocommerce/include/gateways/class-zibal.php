@@ -62,7 +62,7 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 
 		$this->title             = $this->settings['title'];
 		$this->description       = $this->settings['description'];
-		$this->merchant          = $this->settings['merchantcode'];
+		$this->merchant          = strval( $this->settings['merchantcode'] );
 		$this->match_mobile_card = $this->get_option( 'match_mobile_card', 'no' );
 		$this->non_iran_host     = $this->get_option( 'non_iran_host', 'no' );
 		$this->success_massage   = $this->settings['success_massage'];
@@ -278,21 +278,25 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 
 			$url = sprintf( 'https://gateway.zibal.%s/v1/%s', $this->get_tld(), $action );
 
-			$response = wp_safe_remote_post( $url, [
-				'body'    => json_encode( $params ),
-				'headers' => [
-					'Content-Type' => 'application/json',
-				],
-				'timeout' => 10,
+			$curl = curl_init( $url );
+			curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
+			curl_setopt( $curl, CURLINFO_HEADER_OUT, true );
+			curl_setopt( $curl, CURLOPT_POST, true );
+			curl_setopt( $curl, CURLOPT_POSTFIELDS, json_encode( $params ) );
+			curl_setopt( $curl, CURLOPT_HTTPHEADER, [
+				'Content-Type: application/json'
 			] );
 
-			if ( is_wp_error( $response ) ) {
-				throw  new Exception( $response->get_error_message() );
+			$response = curl_exec( $curl );
+			$error    = curl_error( $curl );
+
+			curl_close( $curl );
+
+			if ( $error ) {
+				throw  new Exception( $error );
 			}
 
-			$body = wp_remote_retrieve_body( $response );
-
-			return json_decode( $body, true, 512, JSON_THROW_ON_ERROR );
+			return json_decode( $response, true, 512, JSON_THROW_ON_ERROR );
 
 		} catch ( Exception $e ) {
 

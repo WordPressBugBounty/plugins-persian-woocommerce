@@ -5,12 +5,48 @@ defined( 'ABSPATH' ) || exit;
 class Persian_Woocommerce_Address extends Persian_Woocommerce_Core {
 
 	//public
-	public $country, $states, $class;
+	public static string $country = 'IR';
+
+	public static array $states = [
+		'ABZ' => 'البرز',
+		'ADL' => 'اردبیل',
+		'EAZ' => 'آذربایجان شرقی',
+		'WAZ' => 'آذربایجان غربی',
+		'BHR' => 'بوشهر',
+		'CHB' => 'چهارمحال و بختیاری',
+		'FRS' => 'فارس',
+		'GIL' => 'گیلان',
+		'GLS' => 'گلستان',
+		'HDN' => 'همدان',
+		'HRZ' => 'هرمزگان',
+		'ILM' => 'ایلام',
+		'ESF' => 'اصفهان',
+		'KRN' => 'کرمان',
+		'KRH' => 'کرمانشاه',
+		'NKH' => 'خراسان شمالی',
+		'RKH' => 'خراسان رضوی',
+		'SKH' => 'خراسان جنوبی',
+		'KHZ' => 'خوزستان',
+		'KBD' => 'کهگیلویه و بویراحمد',
+		'KRD' => 'کردستان',
+		'LRS' => 'لرستان',
+		'MKZ' => 'مرکزی',
+		'MZN' => 'مازندران',
+		'GZN' => 'قزوین',
+		'QHM' => 'قم',
+		'SMN' => 'سمنان',
+		'SBN' => 'سیستان و بلوچستان',
+		'THR' => 'تهران',
+		'YZD' => 'یزد',
+		'ZJN' => 'زنجان',
+	];
+
+	public array $class;
 
 	//private
-	private $fields = [];
+	private array $fields = [];
 
-	private $selected_city = [];
+	private array $selected_city = [];
 
 	//private static
 	private static $action_priority = 0;
@@ -20,42 +56,6 @@ class Persian_Woocommerce_Address extends Persian_Woocommerce_Core {
 	private static $inline_script_printed = false;
 
 	public function __construct() {
-
-		$this->country = 'IR';
-		$this->states  = [
-			'ABZ' => 'البرز',
-			'ADL' => 'اردبیل',
-			'EAZ' => 'آذربایجان شرقی',
-			'WAZ' => 'آذربایجان غربی',
-			'BHR' => 'بوشهر',
-			'CHB' => 'چهارمحال و بختیاری',
-			'FRS' => 'فارس',
-			'GIL' => 'گیلان',
-			'GLS' => 'گلستان',
-			'HDN' => 'همدان',
-			'HRZ' => 'هرمزگان',
-			'ILM' => 'ایلام',
-			'ESF' => 'اصفهان',
-			'KRN' => 'کرمان',
-			'KRH' => 'کرمانشاه',
-			'NKH' => 'خراسان شمالی',
-			'RKH' => 'خراسان رضوی',
-			'SKH' => 'خراسان جنوبی',
-			'KHZ' => 'خوزستان',
-			'KBD' => 'کهگیلویه و بویراحمد',
-			'KRD' => 'کردستان',
-			'LRS' => 'لرستان',
-			'MKZ' => 'مرکزی',
-			'MZN' => 'مازندران',
-			'GZN' => 'قزوین',
-			'QHM' => 'قم',
-			'SMN' => 'سمنان',
-			'SBN' => 'سیستان و بلوچستان',
-			'THR' => 'تهران',
-			'YZD' => 'یزد',
-			'ZJN' => 'زنجان',
-		];
-
 		add_filter( 'woocommerce_get_country_locale', [ $this, 'locales' ] );
 		add_filter( 'woocommerce_localisation_address_formats', [ $this, 'address_formats' ] );
 		add_filter( 'woocommerce_states', [ $this, 'iran_states' ], 10, 1 );
@@ -81,7 +81,7 @@ class Persian_Woocommerce_Address extends Persian_Woocommerce_Core {
 	}
 
 	public function locales( $locales ) {
-		$locales[ $this->country ] = [
+		$locales[ self::$country ] = [
 			'state'    => [ 'label' => __( 'Province', 'woocommerce' ) ],
 			'postcode' => [ 'label' => __( 'Postcode', 'woocommerce' ) ],
 		];
@@ -90,14 +90,14 @@ class Persian_Woocommerce_Address extends Persian_Woocommerce_Core {
 	}
 
 	public function address_formats( $formats ) {
-		$formats[ $this->country ] = "{first_name} {last_name}\n{company}\n{country}\n{state}\n{city}\n{address_1}\n{address_2}\n{postcode}";
+		$formats[ self::$country ] = "{first_name} {last_name}\n{company}\n{country}\n{state}\n{city}\n{address_1}\n{address_2}\n{postcode}";
 
 		return $formats;
 	}
 
 	public function iran_states( $states ) {
 
-		$states[ $this->country ] = $this->states;
+		$states[ self::$country ] = self::$states;
 
 		if ( PW()->get_options( 'allowed_states', 'all' ) == 'all' ) {
 			return $states;
@@ -106,14 +106,14 @@ class Persian_Woocommerce_Address extends Persian_Woocommerce_Core {
 		$selections = PW()->get_options( 'specific_allowed_states' );
 
 		if ( is_array( $selections ) ) {
-			$states[ $this->country ] = array_intersect_key( $this->states, array_flip( $selections ) );
+			$states[ self::$country ] = array_intersect_key( self::$states, array_flip( $selections ) );
 		}
 
 		return $states;
 	}
 
 	//--------------------------------------------
-	public function checkout_fields( $fields ) {
+	public function checkout_fields( array $fields ): array {
 
 		$this->fields = $fields;
 
@@ -299,7 +299,7 @@ class Persian_Woocommerce_Address extends Persian_Woocommerce_Core {
 
 				$countries = 'get_' . str_replace( 'billing', 'allowed', $type ) . '_countries';
 				$countries = WC()->countries->$countries();
-				$iran_exist = isset( $countries[ strtoupper( $this->country ) ] ) || isset( $countries[ strtolower( $this->country ) ] ) || isset( $countries[ ucfirst( $this->country ) ] ) ? 'yes' : 'no';
+				$iran_exist = isset( $countries[ strtoupper( self::$country ) ] ) || isset( $countries[ strtolower( self::$country ) ] ) || isset( $countries[ ucfirst( self::$country ) ] ) ? 'yes' : 'no';
 				$just_iran = count( $countries ) == 1 && $iran_exist == 'yes' ? 'yes' : 'no';
 				?>
 
@@ -308,7 +308,7 @@ class Persian_Woocommerce_Address extends Persian_Woocommerce_Core {
 
                 $(document.body).on('change', '#<?php echo esc_attr( $type ); ?>_state', function () {
 
-                    if (<?php echo esc_attr( $type ); ?>_iran_exist == 'yes' && (<?php echo esc_attr( $type ); ?>_just_iran || $('#<?php echo esc_attr( $type ); ?>_country').val() == '<?php echo esc_attr( $this->country ); ?>')) {
+                    if (<?php echo esc_attr( $type ); ?>_iran_exist == 'yes' && (<?php echo esc_attr( $type ); ?>_just_iran || $('#<?php echo esc_attr( $type ); ?>_country').val() == '<?php echo esc_attr( self::$country ); ?>')) {
 
 						<?php echo esc_attr( $type ); ?>_cities = [];
 						<?php echo esc_attr( $type ); ?>_cities[0] = new Array('خطا در دریافت شهرها', '0');
@@ -351,7 +351,7 @@ class Persian_Woocommerce_Address extends Persian_Woocommerce_Core {
                 var <?php echo esc_attr( $type ); ?>_city_input = '<input id="<?php echo esc_attr( $type ); ?>_city" name="<?php echo esc_attr( $type ); ?>_city" type="text" class="input-text" value="<?php echo esc_attr( $value );?>" placeholder="<?php echo esc_attr( $placeholder );?>" />';
 
                 $(document.body).on('change', '#<?php echo esc_attr( $type ); ?>_country', function () {
-                    var is_iran = $('#<?php echo esc_attr( $type ); ?>_country').val() == '<?php echo esc_attr( $this->country ); ?>' ? 'yes' : 'no';
+                    var is_iran = $('#<?php echo esc_attr( $type ); ?>_country').val() == '<?php echo esc_attr( self::$country ); ?>' ? 'yes' : 'no';
                     set_iran_cities_field('<?php echo esc_attr( $type ); ?>', is_iran);
                 });
                 $('#<?php echo esc_attr( $type ); ?>_country').trigger('change');

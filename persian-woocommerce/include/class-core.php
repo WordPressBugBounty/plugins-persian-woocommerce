@@ -13,7 +13,10 @@ class Persian_Woocommerce_Core {
 	protected $options = [];
 
 	// sub classes
-	public $tools, $translate, $address, $gateways;
+	public Persian_Woocommerce_Tools $tools;
+	public Persian_Woocommerce_Translate $translate;
+	public Persian_Woocommerce_Address $address;
+	public Persian_Woocommerce_Gateways $gateways;
 
 	protected static $_instance = null;
 
@@ -99,7 +102,7 @@ class Persian_Woocommerce_Core {
 			50 => [
 				'title'      => 'تاپین | باجه مجازی پستی',
 				'capability' => 'manage_woocommerce',
-				'slug'       => 'https://yun.ir/pwtm',
+				'slug'       => 'https://hits.ir/tapin',
 				'callback'   => '',
 			],
 			60 => [
@@ -121,7 +124,7 @@ class Persian_Woocommerce_Core {
 		?>
 		<script type="text/javascript">
             jQuery(document).ready(function ($) {
-                $("ul#adminmenu a[href$='https://yun.ir/pwtm']").attr('target', '_blank');
+                $("ul#adminmenu a[href$='https://hits.ir/tapin']").attr('target', '_blank');
             });
 		</script>
 		<?php

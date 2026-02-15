@@ -7,7 +7,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Morilog\Jalali\CalendarUtils;
 use Morilog\Jalali\Jalalian;
 
@@ -33,10 +32,10 @@ class Persian_Woocommerce_Date {
 		add_action( 'woocommerce_process_shop_coupon_meta', [ $this, 'process_shop_coupon_meta' ], 100, 1 );
 
 		add_filter( 'pre_get_posts', [ $this, 'pre_get_posts' ] );
-		add_action( 'restrict_manage_posts', [ $this, 'restrict_manage_posts' ] );
+		add_action( 'restrict_manage_posts', [ $this, 'restrict_manage_posts' ], 10, 2 );
 
 		add_filter( 'woocommerce_order_query_args', [ $this, 'pre_get_orders' ] );
-		add_action( 'woocommerce_order_list_table_restrict_manage_orders', [ $this, 'restrict_manage_orders' ] );
+		add_action( 'woocommerce_order_list_table_restrict_manage_orders', [ $this, 'restrict_manage_posts' ], 10, 2 );
 
 		add_filter( 'wp_date', [ $this, 'wp_date' ], 100, 4 );
 	}
@@ -246,38 +245,44 @@ class Persian_Woocommerce_Date {
 		return $query;
 	}
 
-	public function restrict_manage_posts() {
+	public function restrict_manage_posts( string $post_type, string $which ) {
 		global $wpdb;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$order_dates = $wpdb->get_results( sprintf( "
+		$dates = get_transient( "persian_woocommerce_{$post_type}_dates" );
+
+		if ( $dates === false ) {
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$post_dates = $wpdb->get_results( sprintf( "
 				SELECT date( post_date_gmt ) AS date, count(*) as count
 
 				FROM `%s`
 				
 				WHERE post_status != 'trash'
-				and post_type = 'shop_order'
+				and post_type = '%s'
 				and date( post_date_gmt ) != '0000-00-00' 
 				and year( post_date_gmt ) > '2010'
 
 				GROUP BY date( post_date_gmt )
 				ORDER BY post_date_gmt DESC;
-			", $wpdb->posts ) );
+			", $wpdb->posts, $post_type ) );
 
-		$dates = [];
+			$dates = [];
 
-		foreach ( $order_dates as $order_date ) {
+			foreach ( $post_dates as $post_date ) {
 
-			$date = call_user_func_array( [
-				CalendarUtils::class,
-				'toJalali',
-			], explode( '-', $order_date->date ) );
+				$date = call_user_func_array( [
+					CalendarUtils::class,
+					'toJalali',
+				], explode( '-', $post_date->date ) );
 
-			if ( ! isset( $dates[ $date[0] ][ $date[1] ] ) ) {
-				$dates[ $date[0] ][ $date[1] ] = 0;
+				if ( ! isset( $dates[ $date[0] ][ $date[1] ] ) ) {
+					$dates[ $date[0] ][ $date[1] ] = 0;
+				}
+
+				$dates[ $date[0] ][ $date[1] ] += $post_date->count;
 			}
 
-			$dates[ $date[0] ][ $date[1] ] += $order_date->count;
+			set_transient( "persian_woocommerce_{$post_type}_dates", $dates, HOUR_IN_SECONDS );
 		}
 
 		$month_names = [
@@ -314,11 +319,11 @@ class Persian_Woocommerce_Date {
 
 		echo '</select>';
 		?>
-        <style>
+		<style>
             #filter-by-date {
                 display: none;
             }
-        </style>
+		</style>
 		<?php
 	}
 
@@ -349,82 +354,6 @@ class Persian_Woocommerce_Date {
 		}
 
 		return $args;
-	}
-
-	public function restrict_manage_orders() {
-		global $wpdb;
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$order_dates = $wpdb->get_results( sprintf( "
-				SELECT date( date_created_gmt ) AS date, count(*) as count
-
-				FROM `%s`
-				
-				WHERE status != 'trash'
-				and type = 'shop_order'
-				and date( date_created_gmt ) != '0000-00-00' 
-				and year( date_created_gmt ) > '2010'
-
-				GROUP BY date( date_created_gmt )
-				ORDER BY date_created_gmt DESC;
-			", OrdersTableDataStore::get_orders_table_name() ) );
-
-		$dates = [];
-
-		foreach ( $order_dates as $order_date ) {
-
-			$date = call_user_func_array( [
-				CalendarUtils::class,
-				'toJalali',
-			], explode( '-', $order_date->date ) );
-
-			if ( ! isset( $dates[ $date[0] ][ $date[1] ] ) ) {
-				$dates[ $date[0] ][ $date[1] ] = 0;
-			}
-
-			$dates[ $date[0] ][ $date[1] ] += $order_date->count;
-		}
-
-		$month_names = [
-			1  => 'فروردین',
-			2  => 'اردیبهشت',
-			3  => 'خرداد',
-			4  => 'تیر',
-			5  => 'مرداد',
-			6  => 'شهریور',
-			7  => 'مهر',
-			8  => 'آبان',
-			9  => 'آذر',
-			10 => 'دی',
-			11 => 'بهمن',
-			12 => 'اسفند',
-		];
-
-		$m = intval( $_GET['pwp_m'] ?? 0 );
-		echo '<select name="pwp_m" id="filter-by-pdate">';
-		echo '<option ' . selected( $m, 0, false ) . ' value="0">همه تاریخ‌ها</option>';
-
-		foreach ( $dates as $year => $months ) {
-
-			printf( '<optgroup label="سال %s">', esc_attr( CalendarUtils::convertNumbers( $year ) ) );
-
-			foreach ( $months as $month => $count ) {
-
-				printf( '<option %s value="%d">%s %s (%s)</option>', selected( $year . zeroise( $month, 2 ), $m, true ), intval( $year . zeroise( $month, 2 ) ), esc_attr( $month_names[ $month ] ), esc_attr( CalendarUtils::convertNumbers( $year ) ), esc_attr( CalendarUtils::convertNumbers( $count ) ) );
-
-			}
-
-			printf( '</optgroup>' );
-		}
-
-		echo '</select>';
-		?>
-        <style>
-            #filter-by-date {
-                display: none;
-            }
-        </style>
-		<?php
 	}
 
 	public function wp_date( $date, $format, $timestamp, $timezone ) {

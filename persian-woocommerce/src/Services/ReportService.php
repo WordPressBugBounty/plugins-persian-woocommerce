@@ -355,6 +355,13 @@ class ReportService {
 	public function revenue_chart( Verta $start_date, Verta $end_date, ?string $interval = 'day' ): array {
 		global $wpdb;
 
+		$response_structure = [
+			'net_sales'   => 0.0,
+			'total_sales' => 0.0,
+		];
+
+		$data = $this->generate_metrics_scaffolding( $start_date, $end_date, $interval, $response_structure );
+
 		$sql_chart_data = "
 		    WITH wc_prepared AS (
 		        SELECT
@@ -382,15 +389,8 @@ class ReportService {
 		) );
 
 		if ( empty( $chart_results ) ) {
-			return [];
+			return $data;
 		}
-
-		$response_structure = [
-			'net_sales'   => 0.0,
-			'total_sales' => 0.0,
-		];
-
-		$data = $this->generate_metrics_scaffolding( $start_date, $end_date, $interval, $response_structure );
 
 		foreach ( $chart_results as $row ) {
 

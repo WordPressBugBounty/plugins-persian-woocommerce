@@ -15,7 +15,7 @@ document.addEventListener('alpine:init', () => {
                 }
             },
             previous: {
-               data: null,
+                data: null,
                 filters: {
                     from_data: null,
                     to_date: null,
@@ -126,8 +126,6 @@ document.addEventListener('alpine:init', () => {
 
             await this.getPageData();
 
-            pwLoadTippyInPage();
-
             //initial date picker
             const tempFromDate = this.revenue.current.filters.from_date ? this.revenue.current.filters.from_date  : this.date.today;
             const tempToDate = this.revenue.current.filters.to_date ? this.revenue.current.filters.to_date : this.date.today;
@@ -151,7 +149,7 @@ document.addEventListener('alpine:init', () => {
             for (const objKey in queryString) {
                 if (objKey === 'from_date' || objKey === 'to_date') {
                     if (pwCheckDateFormatIsValid(queryString[objKey])) {
-                        this.revenue.current.filters[objKey] = pwDateToTimestamp(queryString[objKey]);
+                        this.revenue.current.filters[objKey] = pwDateToTimestamp(queryString[objKey], (objKey === 'to_date'));
                     } else {
                         delete queryString[objKey];
                     }
@@ -161,8 +159,8 @@ document.addEventListener('alpine:init', () => {
             }
 
             if (!this.revenue.current.filters?.from_date || !this.revenue.current.filters?.to_date || (this.revenue.current.filters?.from_date > this.revenue.current.filters?.to_date)) {
-                this.revenue.current.filters.from_date = this.date.today.add('days', -30).unix() * 1000;
-                this.revenue.current.filters.to_date = this.date.today.unix() * 1000;
+                this.revenue.current.filters.from_date = this.date.today.startOf('day').add('days', -31).unix() * 1000;
+                this.revenue.current.filters.to_date = this.date.today.endOf('day').unix() * 1000;
             }
 
             const filtersObj = pwGenerateFiltersObject({
@@ -170,6 +168,11 @@ document.addEventListener('alpine:init', () => {
                 comparison: this.date.comparison
             });
             pwSetUrlQueryParams(this.namePage, filtersObj);
+
+            console.log('current')
+            console.log(pwFormatDate(this.revenue.current.filters.from_date, 'YYYY/MM/DD hh:mm:ss'));
+            console.log(pwFormatDate(this.revenue.current.filters.to_date, 'YYYY/MM/DD hh:mm:ss'));
+
 
             const formDate =  new persianDate(this.revenue.current.filters.from_date);
             const toDate = new persianDate(this.revenue.current.filters.to_date);
@@ -182,14 +185,15 @@ document.addEventListener('alpine:init', () => {
                     this.date.previousRange.from = this.date.quick.selected.previousFrom;
                     this.date.previousRange.to = this.date.quick.selected.previousTo;
                 }else{
-                    const diffDays = -1 * (toDate.diff(formDate, 'days') + 1);
-                    this.date.previousRange.from = formDate.add('days', diffDays);
-                    this.date.previousRange.to = toDate.add('days', diffDays)
+                    const diffDays = -1 * (toDate.diff(formDate, 'days'));
+                    this.date.previousRange.from = formDate.add('days', diffDays).startOf('day');
+                    this.date.previousRange.to = toDate.add('days', diffDays).endOf('day');
                 }
             }
 
-            //console.log(pwFormatDate(this.date.previousRange.from, 'YYYY/MM/DD'));
-            //console.log(pwFormatDate(this.date.previousRange.to, 'YYYY/MM/DD'));
+            console.log('previous')
+            console.log(pwFormatDate(this.date.previousRange.from, 'YYYY/MM/DD hh:mm:ss'));
+            console.log(pwFormatDate(this.date.previousRange.to, 'YYYY/MM/DD hh:mm:ss'));
 
             this.revenue.previous.filters.from_date = this.date.previousRange.from.unix() * 1000;
             this.revenue.previous.filters.to_date = this.date.previousRange.to.unix() * 1000;
@@ -200,6 +204,8 @@ document.addEventListener('alpine:init', () => {
                 this.getChartData(),
                 this.getOrders()
             ])
+
+            pwLoadTippyInPage();
         },
 
         async getSummary(){
@@ -379,8 +385,10 @@ document.addEventListener('alpine:init', () => {
             this.revenue.current.filters.to_date = this.date.range.to.getState().selected.unixDate;
 
             if(this.date.quick.selected){
+                console.log(this.date.quick.selected.from.unix() * 1000, this.revenue.current.filters.from_date);
                 if(((this.date.quick.selected.from.unix() * 1000 ) !== this.revenue.current.filters.from_date) || ((this.date.quick.selected.to.unix() * 1000 ) !== this.revenue.current.filters.to_date)){
-                    this.date.quick.selected = null
+                    this.date.quick.selected = null;
+                    console.log("salam")
                 }
             }
 
@@ -390,13 +398,13 @@ document.addEventListener('alpine:init', () => {
             });
             pwSetUrlQueryParams(this.namePage, filtersObj);
 
-             this.getPageData()
+            this.getPageData()
 
         },
 
         clearDateFilter(){
-            this.revenue.current.filters.from_date = this.date.today.add('days', -30).unix() * 1000;
-            this.revenue.current.filters.to_date = this.date.today.unix() * 1000;
+            this.revenue.current.filters.from_date = this.date.today.startOf('day').add('days', -31).unix() * 1000;
+            this.revenue.current.filters.to_date = this.date.today.endOf('day').unix() * 1000;
 
             const filtersObj = pwGenerateFiltersObject({
                 ...this.revenue.current.filters,
@@ -405,7 +413,7 @@ document.addEventListener('alpine:init', () => {
             pwSetUrlQueryParams(this.namePage, filtersObj);
 
             this.date.quick.selected = null;
-             this.getPageData()
+            this.getPageData()
         },
 
         drawingChart(){
@@ -495,14 +503,14 @@ document.addEventListener('alpine:init', () => {
             }else if(changeAmount > 0){
                 return `
                     <div class="flex items-center gap-1 text-positive-state bg-positive-state/10 rounded-md text-xs cursor-pointer py-1 px-2">
-                        <span dir="ltr">+${Number(changeAmount.toFixed(2))}%</span>
+                        <span dir="ltr">+${Number(changeAmount.toFixed(0))}%</span>
                         <img src="${pwAssetsFolder}/images/icons/ascending.svg">
                     </div>
                 `
             }else{
                 return `
                     <div class="flex items-center gap-1 text-warning-state bg-warning-state/10 rounded-md text-xs cursor-pointer py-1 px-2">
-                        <span dir="ltr">${Number(changeAmount.toFixed(2))}%</span>
+                        <span dir="ltr">${Number(changeAmount.toFixed(0))}%</span>
                         <img src="${pwAssetsFolder}/images/icons/descending.svg">
                     </div>
                 `

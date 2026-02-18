@@ -35,7 +35,7 @@ function pwLoadTippyInPage(){
         console.error('Error: ', error);
     }
 }
-    
+
 function pwGetVisiblePages(pagination) {
 
     let visiblePages = [];
@@ -85,10 +85,16 @@ function pwFormatDate(timestamp, format){
     return format ? date.format(format) : date.format();
 }
 
-function pwDateToTimestamp(newDate){
+function pwDateToTimestamp(newDate, end = false){
     const array = newDate.split('-').map(item => Number(item));
     const date = new persianDate(array);
-    return date.unix() * 1000;
+
+    if(end){
+        return date.endOf('day').unix() * 1000;
+    }else {
+        return date.unix() * 1000;
+    }
+
 }
 
 function pwCheckDateFormatIsValid(str) {
@@ -322,56 +328,59 @@ function pwCreateRangeDateFilter(parentEl, dateFromValue, dateToValue) {
 
 function pwCreateQuickSelectDateItems(today){
 
+    today = today.startOf('day');
+
     const arrayItems = [
         {
             type: 'today',
             label: 'امروز',
             from: today,
-            to: today,
-            previousFrom: today.add('days', -1),
-            previousTo: today.add('days', -1)
+            to: today.endOf('day'),
+            previousFrom: today.add('days', -1).startOf('day'),
+            previousTo: today.add('days', -1).endOf('day')
         },
         {
             type: 'yesterday',
             label: 'دیروز',
-            from: today.add('days', -1),
-            to: today.add('days', -1),
-            previousFrom: today.add('days', -2),
-            previousTo: today.add('days', -2)
+            from: today.add('days', -1).startOf('day'),
+            to: today.add('days', -1).endOf('day'),
+            previousFrom: today.add('days', -2).startOf('day'),
+            previousTo: today.add('days', -2).endOf('day')
         },
         {
             type: 'week',
             label: 'هفته تا امروز',
-            from: today.startOf('week'),
-            to: today,
-            previousFrom: today.startOf('week').add('days', -7),
-            previousTo: today.add('days', -7)
+            from: today.startOf('week').startOf('day'),
+            to: today.endOf('day'),
+            previousFrom: today.startOf('week').add('days', -7).startOf('day'),
+            previousTo: today.add('days', -7).endOf('day')
         },
         {
             type: 'last-week',
-            label: 'هفته گدشته',
-            from: today.add('week', -1).startOf('week'),
-            to: today.add('week', -1).endOf('week'),
-            previousFrom: today.add('week', -2).startOf('week'),
-            previousTo: today.add('week', -2).endOf('week')
+            label: 'هفته گذشته',
+            from: today.add('week', -1).startOf('week').add('days', -1).startOf('day'),
+            to: today.add('week', -1).endOf('week').endOf('day'),
+            previousFrom: today.add('week', -2).startOf('week').add('days', -1).startOf('day'),
+            previousTo: today.add('week', -2).endOf('week').endOf('day')
         },
         {
             type: 'month',
             label: 'ماه تا امروز',
-            from: today.startOf('month'),
-            to: today,
-            previousFrom:  today.add('month', -1).startOf('month'),
-            previousTo: today.add('month', -1).startOf('month').add('days', today.date() - 2)
+            from: today.startOf('month').startOf('day'),
+            to: today.endOf('day').endOf('day'),
+            previousFrom:  today.add('month', -1).startOf('month').startOf('day'),
+            previousTo: today.add('month', -1).startOf('month').add('days', today.date() -1).endOf('day')
         },
         {
             type: 'last-month',
             label: 'ماه گذشته',
-            from: today.add('month', -1).startOf('month'),
-            to: today.add('month', -1).endOf('month'),
-            previousFrom: today.add('month', -2).startOf('month'),
-            previousTo: today.add('month', -2).endOf('month')
+            from: today.add('month', -1).startOf('month').startOf('day'),
+            to: today.add('month', -1).endOf('month').endOf('day'),
+            previousFrom: today.add('month', -2).startOf('month').startOf('day'),
+            previousTo: today.add('month', -2).endOf('month').endOf('day')
         },
     ]
+    console.log(arrayItems[0])
 
     switch (today.month()){
         case 1: case 4: case 7: case 10: {
@@ -379,19 +388,19 @@ function pwCreateQuickSelectDateItems(today){
             arrayItems.push({
                 type: 'season',
                 label: 'فصل تا امروز',
-                from: today.startOf('month'),
-                to: today,
-                previousFrom: today.add('month', -3).startOf('month'),
-                previousTo:  today.add('month', -3).startOf('month').add('days', today.date() - 2),
+                from: today.startOf('month').startOf('day'),
+                to: today.endOf('day'),
+                previousFrom: today.add('month', -3).startOf('month').startOf('day'),
+                previousTo:  today.add('month', -3).startOf('month').add('days', today.date() - 1).endOf('day'),
             })
 
             arrayItems.push({
                 type: 'last-season',
                 label: 'فصل گذشته',
-                from: today.startOf('month').add('month', -3),
-                to: today.startOf('month').add('month', -1).endOf('month'),
-                previousFrom: today.add('month', -6).startOf('month'),
-                previousTo: today.add('month', -4).endOf('month'),
+                from: today.startOf('month').add('month', -3).startOf('day'),
+                to: today.startOf('month').add('month', -1).endOf('month').endOf('day'),
+                previousFrom: today.add('month', -6).startOf('month').startOf('day'),
+                previousTo: today.add('month', -4).endOf('month').endOf('day'),
             })
 
             break;
@@ -402,19 +411,19 @@ function pwCreateQuickSelectDateItems(today){
             arrayItems.push({
                 type: 'season',
                 label: 'فصل تا امروز',
-                from: today.add('month', -1).startOf('month'),
-                to: today,
-                previousFrom: today.add('month', -4).startOf('month'),
-                previousTo:  today.add('month', -3).startOf('month').add('days', today.date() - 2),
+                from: today.add('month', -1).startOf('month').startOf('day'),
+                to: today.endOf('day'),
+                previousFrom: today.add('month', -4).startOf('month').startOf('day'),
+                previousTo:  today.add('month', -3).startOf('month').add('days', today.date() - 1).endOf('day'),
             })
 
             arrayItems.push({
                 type: 'last-season',
                 label: 'فصل گذشته',
-                from: today.startOf('month').add('month', -4),
-                to:  today.startOf('month').add('month', -2).endOf('month'),
-                previousFrom: today.startOf('month').add('month', -7),
-                previousTo: today.add('month', -5).startOf('month').endOf('month'),
+                from: today.startOf('month').add('month', -4).startOf('day'),
+                to:  today.startOf('month').add('month', -2).endOf('month').endOf('day'),
+                previousFrom: today.startOf('month').add('month', -7).startOf('day'),
+                previousTo: today.add('month', -5).startOf('month').endOf('month').endOf('day'),
             })
             break;
         }
@@ -424,19 +433,19 @@ function pwCreateQuickSelectDateItems(today){
             arrayItems.push({
                 type: 'season',
                 label: 'فصل تا امروز',
-                from: today.add('month', -2).startOf('month'),
-                to: today,
-                previousFrom: today.add('month', -5).startOf('month'),
-                previousTo:  today.add('month', -3).startOf('month').add('days', today.date() - 2),
+                from: today.add('month', -2).startOf('month').startOf('day'),
+                to: today.endOf('day'),
+                previousFrom: today.add('month', -5).startOf('month').startOf('day'),
+                previousTo:  today.add('month', -3).startOf('month').add('days', today.date() - 1).endOf('day'),
             })
 
             arrayItems.push({
                 type: 'last-season',
                 label: 'فصل گذشته',
-                from: today.startOf('month').add('month', -5),
-                to:  today.startOf('month').add('month', -3).endOf('month'),
-                previousFrom: today.add('month', -8).startOf('month'),
-                previousTo: today.add('month', -6).startOf('month').endOf('month'),
+                from: today.startOf('month').add('month', -5).startOf('day'),
+                to:  today.startOf('month').add('month', -3).endOf('month').endOf('day'),
+                previousFrom: today.add('month', -8).startOf('month').startOf('day'),
+                previousTo: today.add('month', -6).startOf('month').endOf('month').endOf('day'),
             })
             break;
         }
@@ -445,18 +454,18 @@ function pwCreateQuickSelectDateItems(today){
     arrayItems.push({
         type: 'year',
         label: 'سال تا امروز',
-        from: today.startOf('year'),
-        to: today,
-        previousFrom:  today.add('year', -1).startOf('year'),
-        previousTo: today.add('year', -1).startOf('year').add('days', Number(pwConvertPersianNumberToEnglish(today.format("DDD"))) - 2)
+        from: today.startOf('year').startOf('day'),
+        to: today.endOf('day'),
+        previousFrom:  today.add('year', -1).startOf('year').startOf('day'),
+        previousTo: today.add('year', -1).startOf('year').add('days', Number(pwConvertPersianNumberToEnglish(today.format("DDD")))).endOf('day')
     });
     arrayItems.push({
         type: 'last-year',
         label: 'سال گذشته',
-        from: today.add('year', -1).startOf('year'),
-        to: today.add('year', -1).endOf('year'),
-        previousFrom: today.add('year', -2).startOf('year'),
-        previousTo: today.add('year', -2).endOf('year'),
+        from: today.add('year', -1).startOf('year').startOf('day'),
+        to: today.add('year', -1).endOf('year').endOf('day'),
+        previousFrom: today.add('year', -2).startOf('year').startOf('day'),
+        previousTo: today.add('year', -2).endOf('year').endOf('day'),
     });
 
     return arrayItems

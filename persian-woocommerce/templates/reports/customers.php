@@ -430,36 +430,36 @@ wp_localize_script('global-script', 'PersianWooCommerce', [
                         </thead>
 
                         <tbody x-show="table.loading" class="w-full text-sm text-gray-700">
-                            <template x-for="row in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]">
-                                <tr class="border-b bg-white border-gray-200">
-                                    <td class="py-4 md:px-5 px-3">
-                                        <div class="skeleton w-20 h-5 rounded-full"></div>
-                                    </td>
-                                    <td class="py-4 md:px-5 px-3">
-                                        <div class="skeleton w-16 h-5 rounded-full"></div>
-                                    </td>
-                                    <td class="py-4 md:px-5 px-3">
-                                        <div class="skeleton w-32 h-5 rounded-full"></div>
-                                    </td>
-                                    <td class="py-4 md:px-5 px-3">
-                                        <div class="skeleton w-20 h-5 rounded-full"></div>
-                                    </td>
-                                    <td class="py-4 md:px-5 px-3">
-                                        <div class="skeleton w-7 h-5 rounded-full"></div>
-                                    </td>
-                                    <td class="py-4 md:px-5 px-3">
-                                        <div class="skeleton w-20 h-5 rounded-full"></div>
-                                    </td>
-                                    <td class="py-4 md:px-5 px-3">
-                                        <div class="skeleton w-20 h-5 rounded-full"></div>
-                                    </td>
-                                </tr>
-                            </template>
+                        <template x-for="row in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]">
+                            <tr class="border-b bg-white border-gray-200">
+                                <td class="py-4 md:px-5 px-3">
+                                    <div class="skeleton w-20 h-5 rounded-full"></div>
+                                </td>
+                                <td class="py-4 md:px-5 px-3">
+                                    <div class="skeleton w-16 h-5 rounded-full"></div>
+                                </td>
+                                <td class="py-4 md:px-5 px-3">
+                                    <div class="skeleton w-32 h-5 rounded-full"></div>
+                                </td>
+                                <td class="py-4 md:px-5 px-3">
+                                    <div class="skeleton w-20 h-5 rounded-full"></div>
+                                </td>
+                                <td class="py-4 md:px-5 px-3">
+                                    <div class="skeleton w-7 h-5 rounded-full"></div>
+                                </td>
+                                <td class="py-4 md:px-5 px-3">
+                                    <div class="skeleton w-20 h-5 rounded-full"></div>
+                                </td>
+                                <td class="py-4 md:px-5 px-3">
+                                    <div class="skeleton w-20 h-5 rounded-full"></div>
+                                </td>
+                            </tr>
+                        </template>
                         </tbody>
 
                         <tbody
-                            x-show="!table.loading && table.data.length > 0"
-                            class="w-full text-sm text-gray-700"
+                                x-show="!table.loading && table.data.length > 0"
+                                class="w-full text-sm text-gray-700"
                         >
                         <template x-for="row in table.data">
                             <tr class="border-b bg-white border-gray-200">
@@ -479,7 +479,7 @@ wp_localize_script('global-script', 'PersianWooCommerce', [
                                     <span x-text="row.orders"></span>
                                 </td>
                                 <td class="!text-sm py-4 md:px-5 px-3">
-                                    <span x-text="row.total_spent"></span>
+                                    <span x-text="pwFormatPrice(row.total_spent)"></span>
                                 </td>
                                 <td class="!text-sm py-4 md:px-5 px-3">
                                     <span dir="ltr" x-text="row.last_order_date"></span>

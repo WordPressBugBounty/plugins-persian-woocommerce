@@ -7,7 +7,7 @@ Tags: ووکامرس,woocommerce,ووکامرس فارسی,persian woocommerce,s
 Requires at least: 6.0.0
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 10.0.1
+Stable tag: 10.0.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -83,6 +83,12 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.html
 میتوانید راهنما و مستندات را از طریق سایت [WooSupport.ir](https://www.woosupport.ir) بدست بیاورید
 
 == Changelog ==
+= 10.0.2 =
+* بهبود نمایش نمودار برای روزهای بدون فروش
+* بهبود سرعت منوهای ووکامرس فارسی
+* بهبود ابزارک آخرین اخبار پیشخوان
+* حل مشکل تداخل با کامپوزر برخی افزونه‌ها
+* فعالسازی خودکار تجزیه و تحلیل ووکامرس
 = 10.0.0 =
 * افزودن گزارشات جامع فروش و درآمد
 * افزودن گزارشات انبار و موجودی

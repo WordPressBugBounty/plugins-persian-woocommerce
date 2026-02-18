@@ -30,8 +30,8 @@ wp_localize_script('global-script', 'PersianWooCommerce', [
 ?>
 
 <section x-data="revenue()"  class="woo-report-container">
-	<section class="bg-gray-50 text-base py-5">
-		<div class="container">
+    <section class="bg-gray-50 text-base py-5">
+        <div class="container">
 
             <div class="mb-6">
                 <div class="flex items-center flex-wrap gap-2">
@@ -263,16 +263,16 @@ wp_localize_script('global-script', 'PersianWooCommerce', [
                                     </div>
                                 </div>
                                 <div class="text-2xl font-bold mb-3">
-                                   <span x-text="pwFormatPrice(revenue.current.data?.net_sales)"></span>
+                                    <span x-text="pwFormatPrice(revenue.current.data?.net_sales)"></span>
                                     <template x-if="revenue.current.data?.net_sales">
                                         <span x-text="(revenue.current.data?.currency || '')"></span>
                                     </template>
                                 </div>
                                 <div class="flex">
                                     <div
-                                        x-html="compare(revenue.previous.data?.net_sales, revenue.current.data?.net_sales)"
-                                        class="tooltip-btn"
-                                        :tooltip-text="pwFormatPrice(revenue.previous.data?.net_sales) + ' ' + (revenue.current.data?.currency || '')"
+                                            x-html="compare(revenue.previous.data?.net_sales, revenue.current.data?.net_sales)"
+                                            class="tooltip-btn"
+                                            :tooltip-text="pwFormatPrice(revenue.previous.data?.net_sales) + ' ' + (revenue.current.data?.currency || '')"
                                     ></div>
                                 </div>
                             </div>
@@ -292,9 +292,9 @@ wp_localize_script('global-script', 'PersianWooCommerce', [
                                 </div>
                                 <div class="flex">
                                     <div
-                                        x-html="compare(revenue.previous.data?.order_count, revenue.current.data?.order_count)"
-                                        class="tooltip-btn"
-                                        :tooltip-text="pwFormatPrice(revenue.previous.data?.order_count)"
+                                            x-html="compare(revenue.previous.data?.order_count, revenue.current.data?.order_count)"
+                                            class="tooltip-btn"
+                                            :tooltip-text="pwFormatPrice(revenue.previous.data?.order_count)"
                                     ></div>
                                 </div>
                             </div>
@@ -321,9 +321,9 @@ wp_localize_script('global-script', 'PersianWooCommerce', [
                                 </div>
                                 <div class="flex">
                                     <div
-                                        x-html="compare(revenue.previous.data?.avg_daily_net_sales, revenue.current.data?.avg_daily_net_sales)"
-                                        class="tooltip-btn"
-                                        :tooltip-text="pwFormatPrice(revenue.previous.data?.avg_daily_net_sales) + ' ' + (revenue.current.data?.currency || '')"
+                                            x-html="compare(revenue.previous.data?.avg_daily_net_sales, revenue.current.data?.avg_daily_net_sales)"
+                                            class="tooltip-btn"
+                                            :tooltip-text="pwFormatPrice(revenue.previous.data?.avg_daily_net_sales) + ' ' + (revenue.current.data?.currency || '')"
                                     ></div>
                                 </div>
                             </div>
@@ -346,9 +346,9 @@ wp_localize_script('global-script', 'PersianWooCommerce', [
                                 </div>
                                 <div class="flex">
                                     <div
-                                        x-html="compare(revenue.previous.data?.refund_total, revenue.current.data?.refund_total)"
-                                        class="tooltip-btn"
-                                        :tooltip-text="pwFormatPrice(revenue.previous.data?.refund_total) + ' ' + (revenue.current.data?.currency || '')"
+                                            x-html="compare(revenue.previous.data?.refund_total, revenue.current.data?.refund_total)"
+                                            class="tooltip-btn"
+                                            :tooltip-text="pwFormatPrice(revenue.previous.data?.refund_total) + ' ' + (revenue.current.data?.currency || '')"
                                     ></div>
                                 </div>
                             </div>
@@ -388,10 +388,6 @@ wp_localize_script('global-script', 'PersianWooCommerce', [
                             <div class="bg-white h-full rounded-lg border border-light-border p-5">
                                 <div class="flex items-center gap-2 mb-3">
                                     <span class="text-dark-primary text-lg font-semibold">کل درآمد (ناخالص)</span>
-                                    <button class="tooltip-btn"
-                                            tooltip-text="درصد مشتریانی که در بازه زمانی انتخاب‌شده خرید انجام داده‌اند.">
-                                        <img src="<?php echo PW_URL . 'assets'; ?>/images/icons/interface.svg">
-                                    </button>
                                 </div>
                                 <div class="text-2xl font-bold mb-9">
                                     <span x-text="pwFormatPrice(revenue.current.data?.total_sales)"></span>
@@ -505,10 +501,6 @@ wp_localize_script('global-script', 'PersianWooCommerce', [
                                 <div class="flex flex-wrap self-start gap-2 mb-5">
                                     <div class="flex items-center gap-2">
                                         <span class="text-dark-primary text-lg font-semibold">پرفروش‌ترین </span>
-                                        <button class="tooltip-btn"
-                                                tooltip-text="درصد مشتریانی که در بازه زمانی انتخاب‌شده خرید انجام داده‌اند.">
-                                            <img src="<?php echo PW_URL . 'assets'; ?>/images/icons/interface.svg">
-                                        </button>
                                     </div>
 
                                     <div class="flex text-sm border border-gray-300 rounded-lg overflow-hidden mr-auto">
@@ -1052,6 +1044,6 @@ wp_localize_script('global-script', 'PersianWooCommerce', [
 
             </div>
 
-		</div>
-	</section>
+        </div>
+    </section>
 </section>

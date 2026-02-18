@@ -29,8 +29,6 @@ document.addEventListener('alpine:init', () => {
 
         async init(){
             await this.getPageData();
-
-            pwLoadTippyInPage();
         },
 
         //request functions
@@ -39,6 +37,8 @@ document.addEventListener('alpine:init', () => {
                 this.getSummary(),
                 this.getProducts()
             ]);
+
+            pwLoadTippyInPage();
         },
 
         async getSummary(){

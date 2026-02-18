@@ -72,8 +72,6 @@ document.addEventListener('alpine:init', () => {
 
             await this.getPageData();
 
-            pwLoadTippyInPage();
-
             //initial date picker
             const tempFromDate = this.orders.current.filters.from_date ? this.orders.current.filters.from_date  : this.date.today;
             const tempToDate = this.orders.current.filters.to_date ? this.orders.current.filters.to_date : this.date.today;
@@ -97,7 +95,7 @@ document.addEventListener('alpine:init', () => {
             for (const objKey in queryString) {
                 if (objKey === 'from_date' || objKey === 'to_date') {
                     if (pwCheckDateFormatIsValid(queryString[objKey])) {
-                        this.orders.current.filters[objKey] = pwDateToTimestamp(queryString[objKey]);
+                        this.orders.current.filters[objKey] = pwDateToTimestamp(queryString[objKey], (objKey === 'to_date'));
                     } else {
                         delete queryString[objKey];
                     }
@@ -107,8 +105,8 @@ document.addEventListener('alpine:init', () => {
             }
 
             if (!this.orders.current.filters?.from_date || !this.orders.current.filters?.to_date || (this.orders.current.filters?.from_date > this.orders.current.filters?.to_date)) {
-                this.orders.current.filters.from_date = this.date.today.add('days', -30).unix() * 1000;
-                this.orders.current.filters.to_date = this.date.today.unix() * 1000;
+                this.orders.current.filters.from_date = this.date.today.startOf('day').add('days', -31).unix() * 1000;
+                this.orders.current.filters.to_date = this.date.today.endOf('day').unix() * 1000;
             }
 
             const filtersObj = pwGenerateFiltersObject({
@@ -128,9 +126,9 @@ document.addEventListener('alpine:init', () => {
                     this.date.previousRange.from = this.date.quick.selected.previousFrom;
                     this.date.previousRange.to = this.date.quick.selected.previousTo;
                 }else{
-                    const diffDays = -1 * (toDate.diff(formDate, 'days') + 1);
-                    this.date.previousRange.from = formDate.add('days', diffDays);
-                    this.date.previousRange.to = toDate.add('days', diffDays)
+                    const diffDays = -1 * (toDate.diff(formDate, 'days'));
+                    this.date.previousRange.from = formDate.add('days', diffDays).startOf('day');
+                    this.date.previousRange.to = toDate.add('days', diffDays).endOf('day');
                 }
             }
 
@@ -145,6 +143,8 @@ document.addEventListener('alpine:init', () => {
                 this.getCustomers(),
                 this.getChartData()
             ])
+
+            pwLoadTippyInPage();
         },
 
         async getOrders(){
@@ -197,7 +197,7 @@ document.addEventListener('alpine:init', () => {
                 if(result.success){
                     const data = result.data;
 
-                    this.table.data = data.customers.length > 0 ? data.customers : [];
+                    this.table.data = data.customers?.length > 0 ? data.customers : [];
 
                     if(this.table.data.length > 0){
                         this.table.pagination = {
@@ -269,13 +269,13 @@ document.addEventListener('alpine:init', () => {
             });
             pwSetUrlQueryParams(this.namePage, filtersObj);
 
-             this.getPageData()
+            this.getPageData()
 
         },
 
         clearDateFilter(){
-            this.orders.current.filters.from_date = this.date.today.add('days', -30).unix() * 1000;
-            this.orders.current.filters.to_date = this.date.today.unix() * 1000;
+            this.orders.current.filters.from_date = this.date.today.startOf('day').add('days', -31).unix() * 1000;
+            this.orders.current.filters.to_date = this.date.today.endOf('day').unix() * 1000;
 
             const filtersObj = pwGenerateFiltersObject({
                 ...this.orders.current.filters,
@@ -284,7 +284,7 @@ document.addEventListener('alpine:init', () => {
             pwSetUrlQueryParams(this.namePage, filtersObj);
 
             this.date.quick.selected = null;
-             this.getPageData()
+            this.getPageData()
         },
 
         drawingChart(){
@@ -377,14 +377,14 @@ document.addEventListener('alpine:init', () => {
             }else if(changeAmount > 0){
                 return `
                     <div class="flex items-center gap-1 text-positive-state bg-positive-state/10 rounded-md text-xs cursor-pointer py-1 px-2">
-                        <span dir="ltr">+${Number(changeAmount.toFixed(2))}%</span>
+                        <span dir="ltr">+${Number(changeAmount.toFixed(0))}%</span>
                         <img src="${pwAssetsFolder}/images/icons/ascending.svg">
                     </div>
                 `
             }else{
                 return `
                     <div class="flex items-center gap-1 text-warning-state bg-warning-state/10 rounded-md text-xs cursor-pointer py-1 px-2">
-                        <span dir="ltr">${Number(changeAmount.toFixed(2))}%</span>
+                        <span dir="ltr">${Number(changeAmount.toFixed(0))}%</span>
                         <img src="${pwAssetsFolder}/images/icons/descending.svg">
                     </div>
                 `

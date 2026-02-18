@@ -15,7 +15,7 @@ class Persian_Woocommerce_Widget extends Persian_Woocommerce_Core {
 
 	public function widget_setup() {
 		wp_add_dashboard_widget( 'persian_woocommerce_feed',
-			'آخرین اخبار و اطلاعیه های ووکامرس فارسی',
+			'آخرین اخبار ووکامرس فارسی',
 			[ $this, 'widget_render' ],
 			[ $this, 'widget_settings' ] );
 	}
@@ -31,10 +31,10 @@ class Persian_Woocommerce_Widget extends Persian_Woocommerce_Core {
 
 			wp_widget_rss_output( [
 				'url'          => 'https://woocommerce.ir/feed/',
-				'title'        => 'آخرین اخبار و اطلاعیه های ووکامرس فارسی',
+				'title'        => 'آخرین اخبار ووکامرس فارسی',
 				'meta'         => [ 'target' => '_new' ],
 				'items'        => intval( $widget_options['posts_number'] ),
-				'show_summary' => 1,
+				'show_summary' => 0,
 				'show_author'  => 0,
 				'show_date'    => 1,
 			] );
@@ -47,9 +47,9 @@ class Persian_Woocommerce_Widget extends Persian_Woocommerce_Core {
 
 		<div class="rss-widget">
 			<?php echo $cached_output; ?>
-			<div style="border-top: 1px solid #e7e7e7; padding-top: 12px !important; font-size: 12px;">
+			<div style="border-top: 1px solid #e7e7e7; padding-top: 8px !important; margin-top: 8px !important; font-size: 12px;">
 				<img src="<?php echo esc_url( PW()->plugin_url( 'assets/images/feed.png' ) ); ?>" width="16" height="16">
-				<a href="http://woosupport.ir" target="_new" title="خانه">وب سایت پشتیبان ووکامرس فارسی</a>
+				<a href="https://woosupport.ir" target="_new" title="خانه">وب سایت پشتیبان ووکامرس فارسی</a>
 			</div>
 		</div>
 

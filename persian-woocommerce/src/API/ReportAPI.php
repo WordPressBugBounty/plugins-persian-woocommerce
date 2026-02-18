@@ -111,7 +111,7 @@ class ReportAPI extends RestAPI {
 		}
 
 		if ( 'yes' !== get_option( 'woocommerce_analytics_enabled' ) ) {
-			self::response( false, 'قابلیت تجزیه و تحلیل ووکامرس غیرفعال است.' );
+			update_option( 'woocommerce_analytics_enabled', 'yes' );
 		}
 
 		return parent::permission_callback( $request );

@@ -39,7 +39,7 @@ class PW_Tools_General {
 			$_POST['shipping_postcode'] = self::en( sanitize_text_field( $_POST['shipping_postcode'] ) );
 		}
 
-		if ( PW()->get_options( 'phone_validation', 'no' ) != 'no' ) {
+		if ( PW()->get_options( 'phone_validation', 'yes' ) == 'yes' ) {
 			add_action( 'woocommerce_after_checkout_validation', [ $this, 'validate_phone' ], 10, 3 );
 		}
 	}

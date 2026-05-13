@@ -270,16 +270,22 @@ class Persian_Woocommerce_Date {
 
 			foreach ( $post_dates as $post_date ) {
 
-				$date = call_user_func_array( [
-					CalendarUtils::class,
-					'toJalali',
-				], explode( '-', $post_date->date ) );
+				try {
 
-				if ( ! isset( $dates[ $date[0] ][ $date[1] ] ) ) {
-					$dates[ $date[0] ][ $date[1] ] = 0;
+					$date = call_user_func_array( [
+						CalendarUtils::class,
+						'toJalali',
+					], explode( '-', $post_date->date ) );
+
+					if ( ! isset( $dates[ $date[0] ][ $date[1] ] ) ) {
+						$dates[ $date[0] ][ $date[1] ] = 0;
+					}
+
+					$dates[ $date[0] ][ $date[1] ] += $post_date->count;
+
+				} catch ( Exception $e ) {
 				}
 
-				$dates[ $date[0] ][ $date[1] ] += $post_date->count;
 			}
 
 			set_transient( "persian_woocommerce_{$post_type}_dates", $dates, HOUR_IN_SECONDS );

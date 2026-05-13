@@ -469,7 +469,7 @@ class Persian_Woocommerce_Tools extends Persian_Woocommerce_Core {
 					'title'   => 'بررسی صحت تلفن همراه',
 					'id'      => 'PW_Options[phone_validation]',
 					'type'    => 'checkbox',
-					'default' => 'no',
+					'default' => 'yes',
 					'desc'    => 'برای بررسی صحت تلفن همراه و یازده رقمی بودن آن تیک بزنید.',
 				],
 				[

@@ -252,7 +252,7 @@ class ReportService {
 			$customer_list[] = [
 				'user_id'         => intval( $customer->user_id ),
 				'name'            => $customer->first_name,
-				'last_name'       => $customer->last_name,
+				'last_name'       => $customer->last_name ?? '',
 				'email'           => $customer->email,
 				'province_city'   => trim( $this->get_state( $customer->state ) . ' - ' . $this->get_city( $customer->city ), ' -' ),
 				'orders'          => intval( $customer->order_count ),

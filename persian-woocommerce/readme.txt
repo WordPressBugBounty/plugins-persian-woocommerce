@@ -7,7 +7,7 @@ Tags: ووکامرس,woocommerce,ووکامرس فارسی,persian woocommerce,s
 Requires at least: 6.0.0
 Tested up to: 6.9.1
 Requires PHP: 7.4
-Stable tag: 10.0.2
+Stable tag: 10.0.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -83,6 +83,11 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.html
 میتوانید راهنما و مستندات را از طریق سایت [WooSupport.ir](https://www.woosupport.ir) بدست بیاورید
 
 == Changelog ==
+= 10.0.3 =
+* ترجمه کلمه shipment در تسویه حساب
+* حل خطای too early ترجمه ووکامرس
+* حل مشکل نام خانوادگی کاربر در گزارشات برخی سایت‌ها
+* فعالسازی پیشفرض بررسی صحت تلفن همراه
 = 10.0.2 =
 * بهبود نمایش نمودار برای روزهای بدون فروش
 * بهبود سرعت منوهای ووکامرس فارسی

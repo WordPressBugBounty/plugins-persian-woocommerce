@@ -4,6 +4,9 @@ namespace PersianWooCommerce\Services;
 
 use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
 use Automattic\WooCommerce\Internal\Admin\Settings;
+use DateInterval;
+use DatePeriod;
+use DateTime;
 use Hekmatinasser\Verta\Verta;
 use Persian_Woocommerce_Address;
 
@@ -600,29 +603,62 @@ class ReportService {
 		$lowstock_threshold = intval( get_option( 'woocommerce_notify_low_stock_amount', 2 ) );
 
 		$totals_sql = "
-	        WITH product_stock_data AS (
-			    SELECT
-			        l.stock_status,
-			        l.stock_quantity,
-			        pm_manage.meta_value AS manage_stock,
-			        CAST(pm_price.meta_value AS DECIMAL(10,0)) AS price,
-			        pm_low.meta_value AS low_stock_threshold
-			    FROM {$this->table_product_meta_lookup} l
-			    JOIN {$wpdb->posts} p ON l.product_id = p.ID
-			    LEFT JOIN {$wpdb->postmeta} pm_manage ON p.ID = pm_manage.post_id AND pm_manage.meta_key = '_manage_stock'
-			    LEFT JOIN {$wpdb->postmeta} pm_price ON p.ID = pm_price.post_id AND pm_price.meta_key = '_price'
-			    LEFT JOIN {$wpdb->postmeta} pm_low ON p.ID = pm_low.post_id AND pm_low.meta_key = '_low_stock_amount'
-			    WHERE p.post_status = 'publish' AND p.post_type IN ('product', 'product_variation')
-			)
-			SELECT
-			    SUM(CASE WHEN stock_status = 'instock' THEN 1 ELSE 0 END) AS instock_count,
-			    SUM(CASE WHEN stock_status = 'outofstock' THEN 1 ELSE 0 END) AS outofstock_count,
-			    SUM(CASE WHEN stock_status = 'onbackorder' THEN 1 ELSE 0 END) AS onbackorder_count,
-			    SUM(CASE WHEN manage_stock = 'yes' AND stock_status = 'instock' AND stock_quantity <= IFNULL(low_stock_threshold, %d) THEN 1 ELSE 0 END) AS lowstock_count,
-			    SUM(CASE WHEN manage_stock = 'yes' AND stock_status = 'instock' THEN stock_quantity * price ELSE 0 END) AS total_stock_value,
-			    SUM(CASE WHEN manage_stock = 'yes' AND stock_status = 'instock' THEN stock_quantity ELSE 0 END) AS total_stock_units
-			FROM product_stock_data;
-        ";
+        WITH product_stock_data AS (
+		    SELECT 
+		        p.ID, p.post_type, p.post_parent,
+		        l.stock_status,
+		        l.stock_quantity,
+		        pm_manage.meta_value AS manage_stock,
+		        CAST(pm_price.meta_value AS DECIMAL(10,0)) AS price,
+		        pm_low.meta_value AS low_stock_threshold
+		    FROM {$this->table_product_meta_lookup} l
+		    JOIN {$wpdb->posts} p ON l.product_id = p.ID
+		    LEFT JOIN {$wpdb->postmeta} pm_manage ON p.ID = pm_manage.post_id AND pm_manage.meta_key = '_manage_stock'
+		    LEFT JOIN {$wpdb->postmeta} pm_price ON p.ID = pm_price.post_id AND pm_price.meta_key = '_price'
+		    LEFT JOIN {$wpdb->postmeta} pm_low ON p.ID = pm_low.post_id AND pm_low.meta_key = '_low_stock_amount'
+		    WHERE p.post_status = 'publish'
+		    AND (
+		        p.post_type = 'product_variation'
+		        OR (
+		            p.post_type = 'product'
+		            AND NOT EXISTS (
+		                SELECT 1 FROM {$wpdb->posts} v
+		                WHERE v.post_parent = p.ID
+		                AND v.post_type = 'product_variation'
+		            )
+		        )
+		    )
+		)
+		SELECT
+		    SUM(CASE WHEN stock_status = 'instock' THEN 1 ELSE 0 END) AS instock_count,
+		    SUM(CASE WHEN stock_status = 'outofstock' THEN 1 ELSE 0 END) AS outofstock_count,
+		    SUM(CASE WHEN stock_status = 'onbackorder' THEN 1 ELSE 0 END) AS onbackorder_count,
+		    SUM(
+		        CASE 
+		            WHEN manage_stock = 'yes'
+		            AND stock_status = 'instock'
+		            AND stock_quantity <= IFNULL(low_stock_threshold, %d)
+		            THEN 1 ELSE 0
+		        END
+		    ) AS lowstock_count,
+		    SUM(
+		        CASE 
+		            WHEN manage_stock = 'yes'
+		            AND stock_status = 'instock'
+		            THEN stock_quantity * price
+		            ELSE 0
+		        END
+		    ) AS total_stock_value,
+		    SUM(
+		        CASE 
+		            WHEN manage_stock = 'yes'
+		            AND stock_status = 'instock'
+		            THEN stock_quantity
+		            ELSE 0
+		        END
+		    ) AS total_stock_units
+		FROM product_stock_data;
+    ";
 
 		$totals = $wpdb->get_row( $wpdb->prepare( $totals_sql, $lowstock_threshold ) );
 
@@ -647,18 +683,30 @@ class ReportService {
 		$offset             = ( $page - 1 ) * $per_page;
 
 		$cte_sql = "
-	        WITH product_meta_data AS (
-	            SELECT
-	                p.ID, p.post_title, p.post_parent, p.post_type,
-	                MAX(CASE WHEN pm.meta_key = '_manage_stock' THEN pm.meta_value END) AS manage_stock,
-	                CAST(MAX(CASE WHEN pm.meta_key = '_price' THEN pm.meta_value END) AS DECIMAL(10, 0)) AS price,
-	                CAST(MAX(CASE WHEN pm.meta_key = '_low_stock_amount' THEN pm.meta_value END) AS SIGNED) AS low_stock_threshold
-	            FROM {$wpdb->posts} p
-	            LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
-	            WHERE p.post_status = 'publish' AND p.post_type IN ('product', 'product_variation')
-	            GROUP BY p.ID
-	        )
-	    ";
+        WITH product_meta_data AS (
+            SELECT
+                p.ID, p.post_title, p.post_parent, p.post_type,
+                MAX(CASE WHEN pm.meta_key = '_manage_stock' THEN pm.meta_value END) AS manage_stock,
+                CAST(MAX(CASE WHEN pm.meta_key = '_price' THEN pm.meta_value END) AS DECIMAL(10,0)) AS price,
+                CAST(MAX(CASE WHEN pm.meta_key = '_low_stock_amount' THEN pm.meta_value END) AS SIGNED) AS low_stock_threshold
+            FROM {$wpdb->posts} p
+            LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+            WHERE p.post_status = 'publish'
+            AND (
+                p.post_type = 'product_variation'
+                OR (
+                    p.post_type = 'product'
+                    AND NOT EXISTS (
+                        SELECT 1 FROM {$wpdb->posts} v
+                        WHERE v.post_parent = p.ID
+                        AND v.post_type = 'product_variation'
+                    )
+                )
+            )
+
+            GROUP BY p.ID
+        )
+    ";
 
 		$where_clause = '';
 		switch ( $status ) {
@@ -683,22 +731,20 @@ class ReportService {
 		$total_items     = $wpdb->get_var( $total_items_sql );
 
 		$sql_query_string = "
-	        {$cte_sql}
-	        SELECT
-	            pmd.ID AS product_id, pmd.post_title AS name, pmd.post_parent AS parent_id,
-	            CASE
-	                WHEN pmd.post_type = 'product_variation' THEN 'variation'
-	                WHEN EXISTS(SELECT 1 FROM {$wpdb->posts} WHERE post_parent = pmd.ID AND post_type = 'product_variation') THEN 'variable'
-	                ELSE 'simple'
-	            END AS product_type,
-	            l.sku, l.stock_status, l.stock_quantity,
-	            pmd.manage_stock, pmd.price, pmd.low_stock_threshold
-	        FROM product_meta_data pmd
-	        INNER JOIN {$this->table_product_meta_lookup} l ON pmd.ID = l.product_id
-	        WHERE {$where_clause}
-	        ORDER BY (CASE WHEN pmd.post_parent = 0 THEN pmd.ID ELSE pmd.post_parent END), pmd.post_parent, pmd.ID ASC
-	        LIMIT %d OFFSET %d;
-        ";
+        {$cte_sql}
+        SELECT
+            pmd.ID AS product_id, pmd.post_title AS name, pmd.post_parent AS parent_id, 
+            pmd.post_type, l.sku, l.stock_status, l.stock_quantity, pmd.manage_stock, 
+            pmd.price, pmd.low_stock_threshold
+        FROM product_meta_data pmd
+        INNER JOIN {$this->table_product_meta_lookup} l
+        ON pmd.ID = l.product_id
+        WHERE {$where_clause}
+        ORDER BY (CASE WHEN pmd.post_parent = 0 THEN pmd.ID ELSE pmd.post_parent END),
+        pmd.post_parent,
+        pmd.ID ASC
+        LIMIT %d OFFSET %d;
+    ";
 		$products         = $wpdb->get_results( $wpdb->prepare( $sql_query_string, $per_page, $offset ) );
 
 		$product_list = [];
@@ -714,33 +760,35 @@ class ReportService {
 				$current_status = 'lowstock';
 			}
 
+			$name = $product->name;
+
+			if ( $product->post_type === 'product_variation' ) {
+
+				$parent_title = get_the_title( $product->parent_id );
+				$variation    = wc_get_product( $product->product_id );
+
+				if ( $variation ) {
+
+					$attributes = wc_get_formatted_variation( $variation, true, false, true );
+					$name       = $parent_title . ' - ' . $attributes;
+
+				}
+
+			}
+
 			$product_data = [
 				'id'        => intval( $product->product_id ),
 				'parent_id' => intval( $product->parent_id ),
-				'type'      => $product->product_type,
-				'name'      => $product->name,
+				'type'      => $product->post_type === 'product_variation' ? 'variation' : 'simple',
+				'name'      => $name,
 				'sku'       => $product->sku ?: '',
 				'manage'    => $is_managed,
 				'status'    => $current_status,
 				'permalink' => urldecode( get_permalink( $product->parent_id > 0 ? $product->parent_id : $product->product_id ) ),
 				'edit_url'  => $this->get_product_edit_url( $product ),
-
 			];
 
-			if ( $product->product_type === 'variable' ) {
-
-				$product_data['stock_count'] = null;
-				$product_data['price']       = null;
-
-			} else {
-
-				$product_data['stock_count'] = intval( $product->stock_quantity );
-				$product_data['price']       = floatval( $product->price );
-
-			}
-
 			$product_list[] = $product_data;
-
 		}
 
 		return [
@@ -825,11 +873,27 @@ class ReportService {
 				$current_status = 'lowstock';
 			}
 
+			$name = $product->name;
+
+			if ( $product->post_type === 'product_variation' ) {
+
+				$parent_title = get_the_title( $product->parent_id );
+				$variation    = wc_get_product( $product->product_id );
+
+				if ( $variation ) {
+
+					$attributes = wc_get_formatted_variation( $variation, true, false, true );
+					$name       = $parent_title . ' - ' . $attributes;
+
+				}
+
+			}
+
 			$product_data   = [
 				'id'          => intval( $product->product_id ),
 				'parent_id'   => intval( $product->parent_id ),
 				'type'        => $product->product_type,
-				'name'        => $product->name,
+				'name'        => $name,
 				'sku'         => $product->sku ?: '',
 				'manage'      => $is_managed ? 'Yes' : 'No',
 				'status'      => $current_status,

@@ -4,10 +4,10 @@ Contributors: Persianscript, mahdiy
 author URI: https://woosupport.ir/
 plugin URI: https://woosupport.ir/download/
 Tags: ووکامرس,woocommerce,ووکامرس فارسی,persian woocommerce,shamsi
-Requires at least: 6.0.0
-Tested up to: 6.9.1
+Requires at least: 6.8
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 10.0.3
+Stable tag: 10.0.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -83,8 +83,15 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.html
 میتوانید راهنما و مستندات را از طریق سایت [WooSupport.ir](https://www.woosupport.ir) بدست بیاورید
 
 == Changelog ==
-= 10.0.3 =
+= 10.0.5 =
+* بروزرسانی ترجمه های ووکامرس ۱۱
+* سازگاری با php 8.4
+= 10.0.4 =
 * ترجمه کلمه shipment در تسویه حساب
+* نمایش عنوان محصولات متغیر در گزارش انبار
+* حذف استفاده از تابع منقضی شده wc_enqueue_js
+= 10.0.3 =
+* ترجمه کلمه shipment 1 در تسویه حساب
 * حل خطای too early ترجمه ووکامرس
 * حل مشکل نام خانوادگی کاربر در گزارشات برخی سایت‌ها
 * فعالسازی پیشفرض بررسی صحت تلفن همراه

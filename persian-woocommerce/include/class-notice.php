@@ -7,7 +7,8 @@ class Persian_Woocommerce_Notice {
 	public function __construct() {
 		add_action( 'admin_notices', [ $this, 'admin_notices' ], 10 );
 		add_action( 'wp_ajax_pw_dismiss_notice', [ $this, 'dismiss_notice' ] );
-		add_action( 'wp_ajax_pw_update_notice', [ $this, 'update_notice' ] );
+		add_action( 'admin_init', [ $this, 'schedule_update_notice_cron' ] );
+		add_action( 'hourly_update_notice', [ $this, 'update_notice' ] );
 	}
 
 	public function admin_notices() {
@@ -65,27 +66,6 @@ class Persian_Woocommerce_Notice {
             });
 		</script>
 		<?php
-
-		if ( get_transient( 'pw_update_notices' ) ) {
-			return;
-		}
-
-		?>
-		<script type="text/javascript">
-            jQuery(document).ready(function ($) {
-
-                jQuery.ajax({
-                    url: "<?php echo esc_url( admin_url( 'admin-ajax.php' ) ) ?>",
-                    type: 'post',
-                    data: {
-                        action: 'pw_update_notice',
-                        nonce: '<?php echo wp_create_nonce( 'pw_update_notice' ); ?>'
-                    }
-                });
-
-            });
-		</script>
-		<?php
 	}
 
 	public function notices(): array {
@@ -138,15 +118,6 @@ class Persian_Woocommerce_Notice {
 <input type="button" class="button button-primary" value="ارسال حرفه‌ای">
 </a>',
 				'condition' => $page == 'wc-settings' && $tab == 'shipping' && ! $has_shipping,
-				'dismiss'   => 6 * MONTH_IN_SECONDS,
-			],
-			[
-				'id'        => 'tapin-tools',
-				'content'   => '
-			<a href="https://hits.ir/tapin" target="_blank">
-				<img src="' . PW()->plugin_url( 'assets/images/tapin.png' ) . '" style="width: 100%" alt="تاپین">
-			</a>',
-				'condition' => $page == 'persian-wc-tools' && ! $has_shipping,
 				'dismiss'   => 6 * MONTH_IN_SECONDS,
 			],
 			[
@@ -299,17 +270,13 @@ class Persian_Woocommerce_Notice {
 		die();
 	}
 
-	public function update_notice() {
-
-		$update = get_transient( 'pw_update_notices' );
-
-		if ( $update ) {
-			return;
+	function schedule_update_notice_cron() {
+		if ( ! wp_next_scheduled( 'hourly_update_notice' ) ) {
+			wp_schedule_event( time(), 'hourly', 'hourly_update_notice' );
 		}
+	}
 
-		set_transient( 'pw_update_notices', 1, HOUR_IN_SECONDS );
-
-		check_ajax_referer( 'pw_update_notice', 'nonce' );
+	public function update_notice() {
 
 		$notices = wp_remote_get( 'https://woonotice.ir/pw.json', [ 'timeout' => 5, ] );
 		$sign    = wp_remote_get( 'https://woohash.ir/pw.hash', [ 'timeout' => 5, ] );

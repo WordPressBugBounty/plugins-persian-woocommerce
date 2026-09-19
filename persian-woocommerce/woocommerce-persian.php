@@ -3,17 +3,17 @@
  * Plugin Name: ووکامرس فارسی
  * Plugin URI: https://woosupport.ir
  * Description: بسته فارسی ساز ووکامرس فارسی به راحتی سیستم فروشگاه ساز ووکامرس را فارسی می کند. با فعال سازی افزونه ، بسیاری از قابلیت های مخصوص ایران به افزونه افزوده می شوند. پشتیبانی در <a href="http://woosupport.ir" target="_blank">ووکامرس فارسی</a>.
- * Version: 10.0.3
+ * Version: 10.0.5
  * Author: ووکامرس فارسی
  * Author URI: https://woosupport.ir
  * WC requires at least: 7.6.0
- * WC tested up to: 10.5.1
+ * WC tested up to: 11.1.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'PW_VERSION' ) ) {
-	define( 'PW_VERSION', '10.0.3' );
+	define( 'PW_VERSION', '10.0.5' );
 }
 
 if ( ! defined( 'PW_DIR' ) ) {
@@ -50,7 +50,7 @@ add_action( 'woocommerce_loaded', function () {
 
 } );
 
-add_action( 'init', function () {
+add_action( 'woocommerce_init', function () {
 	new  \PersianWooCommerce\PersianWooCommerce();
 } );
 

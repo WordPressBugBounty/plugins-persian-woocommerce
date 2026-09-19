@@ -392,7 +392,8 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 	}
 
 	private function get_tld(): string {
-		return $this->non_iran_host == 'yes' ? 'io' : 'ir';
+		return 'ir';
+		//return $this->non_iran_host == 'yes' ? 'io' : 'ir';
 	}
 
 	/**

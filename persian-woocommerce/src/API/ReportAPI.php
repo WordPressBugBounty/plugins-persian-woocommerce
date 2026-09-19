@@ -114,7 +114,7 @@ class ReportAPI extends RestAPI {
 			update_option( 'woocommerce_analytics_enabled', 'yes' );
 		}
 
-		return parent::permission_callback( $request );
+		return current_user_can( 'view_woocommerce_reports' );
 	}
 
 	private function stock_args(): array {

@@ -12,9 +12,7 @@ abstract class RestAPI {
 
 	abstract public function register_routes();
 
-	public function permission_callback( WP_REST_Request $request ): bool {
-		return current_user_can( 'view_woocommerce_reports' );
-	}
+	abstract public function permission_callback( WP_REST_Request $request ): bool;
 
 	/**
 	 * @param bool        $success
@@ -23,7 +21,7 @@ abstract class RestAPI {
 	 *
 	 * @return no-return
 	 */
-	public static function response( bool $success, string $message = null, array $data = [] ) {
+	public static function response( bool $success, ?string $message = null, array $data = [] ) {
 
 		echo json_encode( [
 			'success' => $success,

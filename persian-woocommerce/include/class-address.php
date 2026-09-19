@@ -368,8 +368,7 @@ class Persian_Woocommerce_Address extends Persian_Woocommerce_Core {
                 });
 
 				<?php if ( is_checkout() ) {
-				wc_enqueue_js( "if ($().select2 && $('#" . $type . "_city').data('select2') && !$('#" . $type . "_state').data('select2'))
-                        $('#" . $type . "_state').select2();" );
+				wp_add_inline_script( 'wc-checkout', "jQuery( function($) { if ( $('#{$type}_city').data('select2') && !$('#{$type}_state').data('select2') ) { $('#{$type}_state').selectWoo(); } } );" );
 			} ?>
 
 				<?php endforeach; ?>

@@ -2,11 +2,13 @@
 
 defined( 'ABSPATH' ) || exit;
 
+remove_action( 'woocommerce_blocks_payment_method_type_registration', 'zibal_register_blocks_payment_method' );
+
 add_filter( 'woocommerce_payment_gateways', function ( $methods ) {
 
 	$methods[] = Persian_Woocommerce_Zibal::class;
 
-	return array_filter( $methods, fn( $value ) => $value != 'WC_Zibal' );
+	return array_filter( $methods, fn( $value ) => $value != 'WC_Zibal' && $value != 'WC_Gateway_Zibal' );
 }, 20 );
 
 add_action( 'after_plugin_row_zibal-payment-gateway-for-woocommerce/index.php', function ( $plugin_file, $plugin_data, $status ) {
@@ -284,7 +286,7 @@ class Persian_Woocommerce_Zibal extends WC_Payment_Gateway {
 			curl_setopt( $curl, CURLOPT_POST, true );
 			curl_setopt( $curl, CURLOPT_POSTFIELDS, json_encode( $params ) );
 			curl_setopt( $curl, CURLOPT_HTTPHEADER, [
-				'Content-Type: application/json'
+				'Content-Type: application/json',
 			] );
 
 			$response = curl_exec( $curl );

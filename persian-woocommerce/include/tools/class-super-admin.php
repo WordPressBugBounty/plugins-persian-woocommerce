@@ -15,23 +15,24 @@ class PW_Super_Admin {
 			return;
 		}
 
+		add_action( 'init', [ $this, 'init' ] );
+
 		add_filter( 'PW_Tools_tabs', [ $this, 'tabs' ] );
 		add_filter( 'PW_Tools_settings', [ $this, 'settings' ] );
-
-		// Woocommerce.com - Not working and useful in IRAN
-		if ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) ) {
-			update_option( 'woocommerce_allow_tracking', 'no', 'yes' );
-		}
 
 		add_filter( 'woocommerce_allow_marketplace_suggestions', '__return_false' );
 		// Woocommerce.com
 
 		if ( PW()->get_options( 'super_admin_boost_woo', 'yes' ) == 'yes' ) {
 
-			add_action( 'admin_menu', function () {
-				foreach ( get_post_types( '', 'names' ) as $post_type ) {
-					remove_meta_box( 'postcustom', $post_type, 'normal' );
-				}
+			add_action( 'add_meta_boxes', function () {
+				remove_meta_box( 'postcustom', 'shop_order', 'normal' );
+				remove_meta_box( 'postcustom', 'shop_order_refund', 'normal' );
+				remove_meta_box( 'postcustom', 'shop_order_placehold', 'normal' );
+			} );
+
+			add_action( 'add_meta_boxes_woocommerce_page_wc-orders', function ( WC_Order $order ) {
+				remove_meta_box( 'order_custom', 'woocommerce_page_wc-orders', 'normal' );
 			} );
 
 			$this->blocked_url['woocommerce.com/wp-json/wccom-extensions/1.0/featured']                                        = '[]';
@@ -62,6 +63,13 @@ class PW_Super_Admin {
 		add_filter( 'pre_http_request', [ $this, 'pre_http_request' ], 1000, 3 );
 	}
 
+	public function init() {
+		// Woocommerce.com - Not working and useful in IRAN
+		if ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) ) {
+			update_option( 'woocommerce_allow_tracking', 'no', true );
+		}
+	}
+	
 	public function tabs( array $tabs ): array {
 
 		$tabs['super_admin'] = 'سوپر ادمین';

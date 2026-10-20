@@ -141,6 +141,8 @@ class PW_Tools_Design {
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_font_scripts' ] );
 		// Login page
 		add_action( 'login_enqueue_scripts', [ $this, 'enqueue_admin_font_scripts' ] );
+		// TinyMCE editor (which loads in iframe)
+		add_filter( 'tiny_mce_before_init', [ $this, 'add_tinymce_font_styles' ] );
 	}
 
 	/**
@@ -154,6 +156,16 @@ class PW_Tools_Design {
 
 		// This file applies the font family
 		wp_enqueue_style( 'pw-admin-font', $this->admin_css_file, [ 'pw-admin-font-family' ], PW_VERSION );
+	}
+
+	public function add_tinymce_font_styles( array $settings ): array {
+		$settings['content_css'] = implode( ',', array_filter( [
+			$settings['content_css'] ?? '',
+			$this->admin_font_css_file,
+			$this->admin_css_file,
+		] ) );
+
+		return $settings;
 	}
 
 	/**

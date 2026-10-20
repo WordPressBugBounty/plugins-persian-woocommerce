@@ -4,6 +4,7 @@ namespace PersianWooCommerce;
 
 
 use PersianWooCommerce\Admin\Menu;
+use PersianWooCommerce\API\AppAPI;
 use PersianWooCommerce\API\ReportAPI;
 
 class PersianWooCommerce {
@@ -11,6 +12,7 @@ class PersianWooCommerce {
 	public function __construct() {
 		new Menu();
 		new ReportAPI();
+		new AppAPI();
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_alpine' ] );
 	}
 

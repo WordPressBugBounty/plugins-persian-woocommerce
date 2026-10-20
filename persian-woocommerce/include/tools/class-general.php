@@ -32,11 +32,11 @@ class PW_Tools_General {
 	function checkout_process_postcode() {
 
 		if ( isset( $_POST['billing_postcode'] ) ) {
-			$_POST['billing_postcode'] = self::en( sanitize_text_field( $_POST['billing_postcode'] ) );
+			$_POST['billing_postcode'] = self::en( $_POST['billing_postcode'] );
 		}
 
 		if ( isset( $_POST['shipping_postcode'] ) ) {
-			$_POST['shipping_postcode'] = self::en( sanitize_text_field( $_POST['shipping_postcode'] ) );
+			$_POST['shipping_postcode'] = self::en( $_POST['shipping_postcode'] );
 		}
 
 		if ( PW()->get_options( 'phone_validation', 'yes' ) == 'yes' ) {
@@ -56,11 +56,11 @@ class PW_Tools_General {
 	public function checkout_process_phone() {
 
 		if ( isset( $_POST['billing_phone'] ) ) {
-			$_POST['billing_phone'] = self::en( sanitize_text_field( $_POST['billing_phone'] ) );
+			$_POST['billing_phone'] = self::en( $_POST['billing_phone'] );
 		}
 
 		if ( isset( $_POST['shipping_phone'] ) ) {
-			$_POST['shipping_phone'] = self::en( sanitize_text_field( $_POST['shipping_phone'] ) );
+			$_POST['shipping_phone'] = self::en( $_POST['shipping_phone'] );
 		}
 
 	}
@@ -77,7 +77,11 @@ class PW_Tools_General {
 
 	}
 
-	private static function en( $number ) {
+	private static function en( string $number ) {
+
+		$number = sanitize_text_field( $number );
+		$number = str_replace( ' ', '', $number );
+
 		$persian        = [ '۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹' ];
 		$arabic         = [ '٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩' ];
 		$english_digits = range( 0, 9 );

@@ -86,8 +86,8 @@ class Persian_Woocommerce_Notice {
 
 		$notices = [
 			[
-				'id'        => '_gateland',
-				'content'   => sprintf( '<b>افزونه درگاه پرداخت هوشمند گیت لند: </b> ۴۱ درگاه مستقیم و غیرمستقیم + درگاه‌های اعتباری، فقط در یک افزونه. <a href="%s" target="_blank"><input type="button" class="button button-primary" value="نصب سریع و رایگان از مخزن وردپرس"></a>',
+				'id'        => 'gateland_46',
+				'content'   => sprintf( '<b>افزونه درگاه پرداخت هوشمند گیت لند: </b> ۴۶ درگاه مستقیم و غیرمستقیم + درگاه‌های اعتباری، فقط در یک افزونه. <a href="%s" target="_blank"><input type="button" class="button button-primary" value="نصب سریع و رایگان از مخزن وردپرس"></a>',
 					$gateland_install_url ),
 				'condition' => $gateland_install_url,
 				'dismiss'   => 2 * MONTH_IN_SECONDS,

@@ -30,8 +30,6 @@ class Persian_Woocommerce_Core {
 
 	public function __construct() {
 
-		$this->activated_plugin();
-
 		$this->options = get_option( 'PW_Options' );
 
 		//add_filter( 'woocommerce_show_addons_page', '__return_false', 100 );
@@ -151,58 +149,6 @@ class Persian_Woocommerce_Core {
 
 		return array_unique( $_screen_ids );
 
-	}
-
-	public function activated_plugin() {
-		global $wpdb;
-
-		if ( ! file_exists( PW_DIR . '/.activated' ) ) {
-			return false;
-		}
-
-		$woocommerce_ir_sql = "CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}woocommerce_ir` (
-			`id` int(11) NOT NULL AUTO_INCREMENT,
-			`text1` text CHARACTER SET utf8 COLLATE utf8_persian_ci NOT NULL,
-			`text2` text CHARACTER SET utf8 COLLATE utf8_persian_ci,
-			PRIMARY KEY (`id`)) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;";
-
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-		dbDelta( $woocommerce_ir_sql );
-
-		//delete deprecated tables-----------------------------
-		$deprecated_tables = [
-			'woocommerce_ir_cities',
-			'Woo_Iran_Cities_By_HANNANStd',
-		];
-
-		foreach ( $deprecated_tables as $deprecated_table ) {
-			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}{$deprecated_table}" );
-		}
-
-		//delete deprecated Options-----------------------------
-		$deprecated_options = [
-			'is_cities_installed',
-			'pw_delete_city_table_2_5',
-			'woocommerce_persian_feed',
-			'redirect_to_woo_persian_about_page',
-			'enable_woocommerce_notice_dismissed',
-			'Persian_Woocommerce_rename_old_table',
-		];
-
-		foreach ( $deprecated_options as $deprecated_option ) {
-			delete_option( $deprecated_option );
-		}
-
-		for ( $i = 0; $i < 10; $i ++ ) {
-			delete_option( 'persian_woo_notice_number_' . $i );
-		}
-
-		unlink( PW_DIR . '/.activated' );
-
-		if ( ! headers_sent() ) {
-			wp_redirect( admin_url( 'admin.php?page=persian-wc-about' ) );
-			die();
-		}
 	}
 
 	public function enqueue_scripts() {

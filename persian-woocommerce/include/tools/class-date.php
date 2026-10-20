@@ -7,6 +7,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Morilog\Jalali\CalendarUtils;
 use Morilog\Jalali\Jalalian;
 
@@ -251,20 +252,26 @@ class Persian_Woocommerce_Date {
 		$dates = get_transient( "persian_woocommerce_{$post_type}_dates" );
 
 		if ( $dates === false ) {
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$post_dates = $wpdb->get_results( sprintf( "
-				SELECT date( post_date_gmt ) AS date, count(*) as count
 
-				FROM `%s`
-				
-				WHERE post_status != 'trash'
-				and post_type = '%s'
-				and date( post_date_gmt ) != '0000-00-00' 
-				and year( post_date_gmt ) > '2010'
+			$is_hpos    = 'shop_order' === $post_type && OrderUtil::custom_orders_table_usage_is_enabled();
+			$table      = $is_hpos ? $wpdb->prefix . 'wc_orders' : $wpdb->posts;
+			$type_field = $is_hpos ? 'type' : 'post_type';
+			$date_field = $is_hpos ? 'date_created_gmt' : 'post_date_gmt';
+			$status     = $is_hpos ? 'status' : 'post_status';
 
-				GROUP BY date( post_date_gmt )
-				ORDER BY post_date_gmt DESC;
-			", $wpdb->posts, $post_type ) );
+			$post_dates = $wpdb->get_results( $wpdb->prepare(
+				"
+							SELECT DATE( {$date_field} ) AS date, COUNT(*) AS count
+							FROM `{$table}`
+							WHERE {$type_field} = %s
+							AND {$status} != 'trash'
+							AND {$date_field} != '0000-00-00 00:00:00'
+							AND YEAR( {$date_field} ) > 2010
+							GROUP BY DATE( {$date_field} )
+							ORDER BY {$date_field} DESC
+							",
+				$post_type
+			) );
 
 			$dates = [];
 

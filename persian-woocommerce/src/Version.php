@@ -27,7 +27,8 @@ class Version extends \Nabik\Utils\V1\Version {
 
 	}
 
-	public function update_1006() {
+	public function update_1007() {
+
 		if ( ! Nabik_Net_Database::Schema()->hasTable( 'woocommerce_ir_app_notifications' ) ) {
 
 			Nabik_Net_Database::Schema()->create( 'woocommerce_ir_app_notifications', function ( Blueprint $table ) {
@@ -43,5 +44,6 @@ class Version extends \Nabik\Utils\V1\Version {
 			} );
 
 		}
+
 	}
 }

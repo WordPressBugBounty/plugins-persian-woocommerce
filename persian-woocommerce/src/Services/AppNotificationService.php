@@ -2,6 +2,7 @@
 
 namespace PersianWooCommerce\Services;
 
+use Exception;
 use PersianWooCommerce\Models\AppNotification;
 use WC_Order;
 
@@ -62,7 +63,7 @@ class AppNotificationService {
 			return;
 		}
 
-		if ( in_array( $old_status, [ 'new', 'auto-draft' ]) ) {
+		if ( in_array( $old_status, [ 'new', 'auto-draft' ] ) ) {
 			return;
 		}
 
@@ -98,7 +99,7 @@ class AppNotificationService {
 
 		} elseif (
 			in_array( $new_status, [ 'processing', 'completed' ] )
-			&& in_array( $old_status, [ 'pending', 'on-hold' ])
+			&& in_array( $old_status, [ 'pending', 'on-hold' ] )
 		) {
 
 			$type  = 'payment_success';
@@ -125,18 +126,24 @@ class AppNotificationService {
 
 		$event_id = md5( $type . '|' . $order_id . '|' . time() . '|' . wp_generate_password( 8, false ) );
 
-		AppNotification::create( [
-			'event_id'   => $event_id,
-			'type'       => sanitize_key( $type ),
-			'title'      => sanitize_text_field( $title ),
-			'body'       => sanitize_textarea_field( $body ),
-			'order_id'   => $order_id,
-			'amount'     => sanitize_text_field( $amount ),
-			'meta'       => $meta,
-			'created_at' => current_time( 'mysql' ),
-		] );
+		try {
 
-		$this->cleanup();
+			AppNotification::create( [
+				'event_id'   => $event_id,
+				'type'       => sanitize_key( $type ),
+				'title'      => sanitize_text_field( $title ),
+				'body'       => sanitize_textarea_field( $body ),
+				'order_id'   => $order_id,
+				'amount'     => sanitize_text_field( $amount ),
+				'meta'       => $meta,
+				'created_at' => current_time( 'mysql' ),
+			] );
+
+			$this->cleanup();
+
+		} catch ( Exception $e ) {
+			return '';
+		}
 
 		return $event_id;
 	}
